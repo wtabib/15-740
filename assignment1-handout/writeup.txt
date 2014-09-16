@@ -1,0 +1,18 @@
+1a) In the worst case, the measurement error will be 199.  In the best
+case the measurement error is 1.  
+If we start exactly on the tick, the delta period ends exactly on the
+tick and we have some error because it ends up taking a whole tick.  If
+we don’t end exactly on the tick, then the measurement isn’t exact and
+we get some error.
+
+((1/(2*10^4)) - 1/(10^2))/(1/(2*10^4)) = 199
+
+1b)  In this case the additions take half a second and there are 50
+deltas.  However, due to similar reasoning from (1a) it’s possible that
+we measure 51 deltas instead of 50.  
+Therefore, 
+
+best case = (0.5 - 50*0.01)/0.5 = 0
+worst case = (0.01/0.5) = 0.02
+
+

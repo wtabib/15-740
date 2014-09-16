@@ -1,0 +1,154 @@
+
+000000000007ee50 <strcat>:
+   7ee50:	48 89 f9             	mov    %rdi,%rcx
+   7ee53:	83 e1 07             	and    $0x7,%ecx
+   7ee56:	48 89 f8             	mov    %rdi,%rax
+   7ee59:	49 b8 ff fe fe fe fe 	mov    $0xfefefefefefefeff,%r8
+   7ee60:	fe fe fe 
+   7ee63:	74 1b                	je     7ee80 <strcat+0x30>
+   7ee65:	f7 d9                	neg    %ecx
+   7ee67:	83 c1 08             	add    $0x8,%ecx
+   7ee6a:	80 38 00             	cmpb   $0x0,(%rax)
+   7ee6d:	0f 84 c2 00 00 00    	je     7ef35 <strcat+0xe5>
+   7ee73:	48 ff c0             	inc    %rax
+   7ee76:	ff c9                	dec    %ecx
+   7ee78:	75 f0                	jne    7ee6a <strcat+0x1a>
+   7ee7a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+   7ee80:	48 8b 08             	mov    (%rax),%rcx
+   7ee83:	48 83 c0 08          	add    $0x8,%rax
+   7ee87:	4c 89 c2             	mov    %r8,%rdx
+   7ee8a:	48 01 ca             	add    %rcx,%rdx
+   7ee8d:	73 61                	jae    7eef0 <strcat+0xa0>
+   7ee8f:	48 31 ca             	xor    %rcx,%rdx
+   7ee92:	4c 09 c2             	or     %r8,%rdx
+   7ee95:	48 ff c2             	inc    %rdx
+   7ee98:	75 56                	jne    7eef0 <strcat+0xa0>
+   7ee9a:	48 8b 08             	mov    (%rax),%rcx
+   7ee9d:	48 83 c0 08          	add    $0x8,%rax
+   7eea1:	4c 89 c2             	mov    %r8,%rdx
+   7eea4:	48 01 ca             	add    %rcx,%rdx
+   7eea7:	73 47                	jae    7eef0 <strcat+0xa0>
+   7eea9:	48 31 ca             	xor    %rcx,%rdx
+   7eeac:	4c 09 c2             	or     %r8,%rdx
+   7eeaf:	48 ff c2             	inc    %rdx
+   7eeb2:	75 3c                	jne    7eef0 <strcat+0xa0>
+   7eeb4:	48 8b 08             	mov    (%rax),%rcx
+   7eeb7:	48 83 c0 08          	add    $0x8,%rax
+   7eebb:	4c 89 c2             	mov    %r8,%rdx
+   7eebe:	48 01 ca             	add    %rcx,%rdx
+   7eec1:	73 2d                	jae    7eef0 <strcat+0xa0>
+   7eec3:	48 31 ca             	xor    %rcx,%rdx
+   7eec6:	4c 09 c2             	or     %r8,%rdx
+   7eec9:	48 ff c2             	inc    %rdx
+   7eecc:	75 22                	jne    7eef0 <strcat+0xa0>
+   7eece:	48 8b 08             	mov    (%rax),%rcx
+   7eed1:	48 83 c0 08          	add    $0x8,%rax
+   7eed5:	4c 89 c2             	mov    %r8,%rdx
+   7eed8:	48 01 ca             	add    %rcx,%rdx
+   7eedb:	73 13                	jae    7eef0 <strcat+0xa0>
+   7eedd:	48 31 ca             	xor    %rcx,%rdx
+   7eee0:	4c 09 c2             	or     %r8,%rdx
+   7eee3:	48 ff c2             	inc    %rdx
+   7eee6:	74 98                	je     7ee80 <strcat+0x30>
+   7eee8:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+   7eeef:	00 
+   7eef0:	48 83 e8 08          	sub    $0x8,%rax
+   7eef4:	84 c9                	test   %cl,%cl
+   7eef6:	74 3d                	je     7ef35 <strcat+0xe5>
+   7eef8:	48 ff c0             	inc    %rax
+   7eefb:	84 ed                	test   %ch,%ch
+   7eefd:	74 36                	je     7ef35 <strcat+0xe5>
+   7eeff:	48 ff c0             	inc    %rax
+   7ef02:	f7 c1 00 00 ff 00    	test   $0xff0000,%ecx
+   7ef08:	74 2b                	je     7ef35 <strcat+0xe5>
+   7ef0a:	48 ff c0             	inc    %rax
+   7ef0d:	f7 c1 00 00 00 ff    	test   $0xff000000,%ecx
+   7ef13:	74 20                	je     7ef35 <strcat+0xe5>
+   7ef15:	48 ff c0             	inc    %rax
+   7ef18:	48 c1 e9 20          	shr    $0x20,%rcx
+   7ef1c:	84 c9                	test   %cl,%cl
+   7ef1e:	74 15                	je     7ef35 <strcat+0xe5>
+   7ef20:	48 ff c0             	inc    %rax
+   7ef23:	84 ed                	test   %ch,%ch
+   7ef25:	74 0e                	je     7ef35 <strcat+0xe5>
+   7ef27:	48 ff c0             	inc    %rax
+   7ef2a:	f7 c1 00 00 ff 00    	test   $0xff0000,%ecx
+   7ef30:	74 03                	je     7ef35 <strcat+0xe5>
+   7ef32:	48 ff c0             	inc    %rax
+   7ef35:	48 89 f1             	mov    %rsi,%rcx
+   7ef38:	83 e1 07             	and    $0x7,%ecx
+   7ef3b:	48 89 c2             	mov    %rax,%rdx
+   7ef3e:	74 20                	je     7ef60 <strcat+0x110>
+   7ef40:	f7 d9                	neg    %ecx
+   7ef42:	83 c1 08             	add    $0x8,%ecx
+   7ef45:	8a 06                	mov    (%rsi),%al
+   7ef47:	84 c0                	test   %al,%al
+   7ef49:	88 02                	mov    %al,(%rdx)
+   7ef4b:	0f 84 b7 00 00 00    	je     7f008 <strcat+0x1b8>
+   7ef51:	48 ff c6             	inc    %rsi
+   7ef54:	48 ff c2             	inc    %rdx
+   7ef57:	ff c9                	dec    %ecx
+   7ef59:	75 ea                	jne    7ef45 <strcat+0xf5>
+   7ef5b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+   7ef60:	48 8b 06             	mov    (%rsi),%rax
+   7ef63:	48 83 c6 08          	add    $0x8,%rsi
+   7ef67:	49 89 c1             	mov    %rax,%r9
+   7ef6a:	4d 01 c1             	add    %r8,%r9
+   7ef6d:	0f 83 7d 00 00 00    	jae    7eff0 <strcat+0x1a0>
+   7ef73:	49 31 c1             	xor    %rax,%r9
+   7ef76:	4d 09 c1             	or     %r8,%r9
+   7ef79:	49 ff c1             	inc    %r9
+   7ef7c:	75 72                	jne    7eff0 <strcat+0x1a0>
+   7ef7e:	48 89 02             	mov    %rax,(%rdx)
+   7ef81:	48 83 c2 08          	add    $0x8,%rdx
+   7ef85:	48 8b 06             	mov    (%rsi),%rax
+   7ef88:	48 83 c6 08          	add    $0x8,%rsi
+   7ef8c:	49 89 c1             	mov    %rax,%r9
+   7ef8f:	4d 01 c1             	add    %r8,%r9
+   7ef92:	73 5c                	jae    7eff0 <strcat+0x1a0>
+   7ef94:	49 31 c1             	xor    %rax,%r9
+   7ef97:	4d 09 c1             	or     %r8,%r9
+   7ef9a:	49 ff c1             	inc    %r9
+   7ef9d:	75 51                	jne    7eff0 <strcat+0x1a0>
+   7ef9f:	48 89 02             	mov    %rax,(%rdx)
+   7efa2:	48 83 c2 08          	add    $0x8,%rdx
+   7efa6:	48 8b 06             	mov    (%rsi),%rax
+   7efa9:	48 83 c6 08          	add    $0x8,%rsi
+   7efad:	49 89 c1             	mov    %rax,%r9
+   7efb0:	4d 01 c1             	add    %r8,%r9
+   7efb3:	73 3b                	jae    7eff0 <strcat+0x1a0>
+   7efb5:	49 31 c1             	xor    %rax,%r9
+   7efb8:	4d 09 c1             	or     %r8,%r9
+   7efbb:	49 ff c1             	inc    %r9
+   7efbe:	75 30                	jne    7eff0 <strcat+0x1a0>
+   7efc0:	48 89 02             	mov    %rax,(%rdx)
+   7efc3:	48 83 c2 08          	add    $0x8,%rdx
+   7efc7:	48 8b 06             	mov    (%rsi),%rax
+   7efca:	48 83 c6 08          	add    $0x8,%rsi
+   7efce:	49 89 c1             	mov    %rax,%r9
+   7efd1:	4d 01 c1             	add    %r8,%r9
+   7efd4:	73 1a                	jae    7eff0 <strcat+0x1a0>
+   7efd6:	49 31 c1             	xor    %rax,%r9
+   7efd9:	4d 09 c1             	or     %r8,%r9
+   7efdc:	49 ff c1             	inc    %r9
+   7efdf:	75 0f                	jne    7eff0 <strcat+0x1a0>
+   7efe1:	48 89 02             	mov    %rax,(%rdx)
+   7efe4:	48 83 c2 08          	add    $0x8,%rdx
+   7efe8:	e9 73 ff ff ff       	jmpq   7ef60 <strcat+0x110>
+   7efed:	0f 1f 00             	nopl   (%rax)
+   7eff0:	88 02                	mov    %al,(%rdx)
+   7eff2:	84 c0                	test   %al,%al
+   7eff4:	74 12                	je     7f008 <strcat+0x1b8>
+   7eff6:	48 ff c2             	inc    %rdx
+   7eff9:	88 22                	mov    %ah,(%rdx)
+   7effb:	84 e4                	test   %ah,%ah
+   7effd:	74 09                	je     7f008 <strcat+0x1b8>
+   7efff:	48 ff c2             	inc    %rdx
+   7f002:	48 c1 e8 10          	shr    $0x10,%rax
+   7f006:	eb e8                	jmp    7eff0 <strcat+0x1a0>
+   7f008:	48 89 f8             	mov    %rdi,%rax
+   7f00b:	c3                   	retq   
+   7f00c:	90                   	nop
+   7f00d:	90                   	nop
+   7f00e:	90                   	nop
+   7f00f:	90                   	nop
