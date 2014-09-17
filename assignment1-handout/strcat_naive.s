@@ -5,28 +5,33 @@
 my_strcat:
 .LFB22:
 	.cfi_startproc
-	movq	%rdi, %rax
-	movq	%rdi, %rdx
-	cmpb	$0, (%rdi)
-	je	.L3
+	movq	%rdi, %rax # *tmp = dest
+    # rdi seems to be tmp (?)
+	movq	%rdi, %rdx 
+	cmpb	$0, (%rdi) # *dest != 0
+	je	.L3            # continue to the for loop
+# This is the while loop
+# here rdx is dest
 .L9:
-	addq	$1, %rdx
-	cmpb	$0, (%rdx)
-	jne	.L9
+	addq	$1, %rdx   # dest++
+	cmpb	$0, (%rdx) # dest != 0
+	jne	.L9            # go back to the start of the while loop
 .L3:
-	movzbl	(%rsi), %ecx
-	testb	%cl, %cl
-	je	.L5
+	movzbl	(%rsi), %ecx    # *dest = *src
+	testb	%cl, %cl        # *src == \0
+	je	.L5                 # if condition is verified break
 .L8:
-	movb	%cl, (%rdx)
-	addq	$1, %rdx
-	addq	$1, %rsi
-	movzbl	(%rsi), %ecx
-	testb	%cl, %cl
-	jne	.L8
+	movb	%cl, (%rdx)     # *dest = *src
+    #incresing dest and src (that is rsi)
+	addq	$1, %rdx        # dest++
+	addq	$1, %rsi        # src ++
+	movzbl	(%rsi), %ecx    # *dest = *src
+	testb	%cl, %cl        # *src == \0
+	jne	.L8                 # if condition not satisfied keep on looping in the
+                            # for
 .L5:
 	rep
-	ret
+	ret                     # return
 	.cfi_endproc
 .LFE22:
 	.size	my_strcat, .-my_strcat
