@@ -11,35 +11,37 @@
 
 int main(int argc, char **argv) {
 
-    struct itimerval first_u; /* user time */
+    struct itimerval start, end; /* user time */
     int i = 0, j, a = 0;
-    first_u.it_interval.tv_sec = 0;
-    first_u.it_interval.tv_usec = 0;
-    first_u.it_value.tv_sec = MAX_ETIME;
-    first_u.it_value.tv_usec = 0;
-    setitimer(ITIMER_VIRTUAL, &first_u, NULL);
+    start.it_interval.tv_sec = 0;
+    start.it_interval.tv_usec = 0;
+    start.it_value.tv_sec = MAX_ETIME;
+    start.it_value.tv_usec = 0;
+    setitimer(ITIMER_VIRTUAL, &start, NULL);
 
-    struct itimerval curr;
-    long double last_time = 0, this_time = 0, b = 0, total = 0;
+    //struct itimerval start, end;
+    long double this_time = 0, b = 0, total = 0;
     long double count = 0;
-    for (i = 0; i < 1000; i++) {
-        for (j = 0; j < 10000; j++)
+    int n = 1;
+    //for (i = 0; i < 1; i++) {
+    while (1) {
+        getitimer(ITIMER_VIRTUAL, &start);
+        for (j = 0; j < n; j++)
         {
             a += j;
         }
-        getitimer(ITIMER_VIRTUAL, &curr);
-        this_time = (long double) ((first_u.it_value.tv_sec - curr.it_value.tv_sec) + (first_u.it_value.tv_usec - curr.it_value.tv_usec)*1e-6);
-        if (i == 0)
-            last_time = this_time;
-        else if (last_time != this_time) {
-            b = this_time - last_time;
-            total = total + b;
-
+        getitimer(ITIMER_VIRTUAL, &end);
+        this_time = (long double) ((start.it_value.tv_sec - end.it_value.tv_sec) + (start.it_value.tv_usec - end.it_value.tv_usec)*1e-6);
+        printf("this time = %Lf\n", this_time);
+        total = total + this_time;
+        if(this_time > 0){
+            printf ("n = %d\t\t%Lf\n", n, this_time);
             count++;
+            break;
         }
-        last_time = this_time;
-
+        n = n+100;
     }
+    
 
     printf("delta = %Lf\n", total/count);
 
