@@ -54,7 +54,9 @@ int main(int argc, char** argv)
 
     /* Do this twice.    The first time warms up the cache: */
     secs = func_time(add_test, 0.02) - func_time(add_dummy, 0.02);
+    printf("secs = %Lf\n", secs);
     secs = func_time(add_test, 0.02) - func_time(add_dummy, 0.02);
+    printf("secs = %Lf\n", secs);
 
     mhz = (100.0/secs)/1000000.0;
     printf("The clock frequency is approximately %.0Lf Megahertz\n", mhz);
