@@ -88,7 +88,7 @@ long double func_time_generic(timer_init_funct init, timer_elapsed_funct elapsed
                               test_funct P, long double E) {
 
     long double delta = compute_resolution(init, elapsed);
-    long double threshold = delta/E;
+    long double threshold = 2.0*delta/E + delta;
 
   
     printf("Error bound: %Lf\n", E);
