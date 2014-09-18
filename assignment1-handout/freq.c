@@ -53,10 +53,20 @@ int main(int argc, char** argv)
     long double secs;
 
     /* Do this twice.    The first time warms up the cache: */
+    printf("Interval timer:\n");
     secs = func_time(add_test, 0.02) - func_time(add_dummy, 0.02);
-    printf("secs = %Lf\n", secs);
+    printf("secs = %Le\n", secs);
     secs = func_time(add_test, 0.02) - func_time(add_dummy, 0.02);
-    printf("secs = %Lf\n", secs);
+    printf("secs = %Le\n", secs);
+
+    mhz = (100.0/secs)/1000000.0;
+    printf("The clock frequency is approximately %.0Lf Megahertz\n", mhz);
+
+    printf("Hardware timer:\n");
+    secs = func_time_hw(add_test, 0.02) - func_time_hw(add_dummy, 0.02);
+    printf("secs = %Le\n", secs);
+    secs = func_time_hw(add_test, 0.02) - func_time_hw(add_dummy, 0.02);
+    printf("secs = %Le\n", secs);
 
     mhz = (100.0/secs)/1000000.0;
     printf("The clock frequency is approximately %.0Lf Megahertz\n", mhz);
