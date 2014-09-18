@@ -20,7 +20,7 @@ void flushCache() {
 long long thing1() {
 
    int i = 0;
-   int numElem = 15000;
+   int numElem = 15000000;
    flushCache();
    int* arr1 = (int *) malloc(numElem*sizeof(int));
    int* arr2 = (int *) malloc(numElem*sizeof(int));
@@ -45,7 +45,7 @@ long long thing1() {
 long long thing2() {
 
    int i = 0;
-   int numElem = 15000;
+   int numElem = 15000000;
    flushCache();
    int* arr1 = (int *) malloc(numElem*sizeof(int));
    int* arr2 = (int *) malloc(numElem*sizeof(int));
@@ -55,13 +55,7 @@ long long thing2() {
 
    for (i = 0; i < numElem; i++) {
         arr1[i%15] = i;
-   }
-
-   for (i = 0; i < numElem; i++) {
         arr2[i%15] = numElem-i;
-   }
-
-   for (i = 0; i < numElem; i++) {
         int elem = arr1[i%15];
    }
 
@@ -87,7 +81,7 @@ int main() {
        total2 += numMisses2;
    }*/
 
-   numCalls = 100;
+   numCalls = 10;
    total1 = 0; total2 = 0;
 
    for (i = 0; i < numCalls; i++) {
