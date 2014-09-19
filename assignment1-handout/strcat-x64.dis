@@ -18,11 +18,11 @@
    7ee83:	48 83 c0 08          	add    $0x8,%rax            # i = i+8
    7ee87:	4c 89 c2             	mov    %r8,%rdx             # put our magic string in rdx
    7ee8a:	48 01 ca             	add    %rcx,%rdx            # add our magic string to the substring we copied in rcx
-   7ee8d:	73 61                	jae    7eef0 <strcat+0xa0>  # jump if we did not carry in our magic addition (i.e. if the last carachter was \0)
+   7ee8d:	73 61                	jae    7eef0 <strcat+0xa0>  # jump if we did not carry in our magic addition (i.e. if the last carachter was \0, if it's in one of the other character the following 4 instructions will determine if it's there)
    7ee8f:	48 31 ca             	xor    %rcx,%rdx            # (str+magic) xor magic
    7ee92:	4c 09 c2             	or     %r8,%rdx             # magic | [(str+magic) xor magic]
    7ee95:	48 ff c2             	inc    %rdx                 # magic | [(str+magic) xor magic] + 1 
-   7ee98:	75 56                	jne    7eef0 <strcat+0xa0>  # if the thing on the last line != 0 jumo to 8 character \0 search
+   7ee98:	75 56                	jne    7eef0 <strcat+0xa0>  # if the thing on the last line != 0 jump to 8 character \0 search
 
 #The next block repeats the previous 9 lines 4 times
    7ee9a:	48 8b 08             	mov    (%rax),%rcx
@@ -99,19 +99,21 @@
    7ef51:	48 ff c6             	inc    %rsi         # src = src + 1
    7ef54:	48 ff c2             	inc    %rdx         # dest = dest + 1
    7ef57:	ff c9                	dec    %ecx         # decrease by one, once it's zero our rsi is 8-byte alligned
-   7ef59:	75 ea                	jne    7ef45 <strcat+0xf5>
-   7ef5b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
-   7ef60:	48 8b 06             	mov    (%rsi),%rax
-   7ef63:	48 83 c6 08          	add    $0x8,%rsi
-   7ef67:	49 89 c1             	mov    %rax,%r9
-   7ef6a:	4d 01 c1             	add    %r8,%r9
-   7ef6d:	0f 83 7d 00 00 00    	jae    7eff0 <strcat+0x1a0>
-   7ef73:	49 31 c1             	xor    %rax,%r9
+   7ef59:	75 ea                	jne    7ef45 <strcat+0xf5>  # jump back if not 8-byte alligned
+   7ef5b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)     # no operation
+   7ef60:	48 8b 06             	mov    (%rsi),%rax          # take the next block of 8 char from src and load them in rax
+   7ef63:	48 83 c6 08          	add    $0x8,%rsi            # increase the point to the next block of 8 char
+   7ef67:	49 89 c1             	mov    %rax,%r9             # make a copy of the substring in r9
+   7ef6a:	4d 01 c1             	add    %r8,%r9              # add to our chunk the magic string     
+   7ef6d:	0f 83 7d 00 00 00    	jae    7eff0 <strcat+0x1a0> # we jump if we found \0 in the last character of the substring considered
+   7ef73:	49 31 c1             	xor    %rax,%r9             # if we did not find it we use the magic string trick to check the other characters
    7ef76:	4d 09 c1             	or     %r8,%r9
    7ef79:	49 ff c1             	inc    %r9
-   7ef7c:	75 72                	jne    7eff0 <strcat+0x1a0>
-   7ef7e:	48 89 02             	mov    %rax,(%rdx)
-   7ef81:	48 83 c2 08          	add    $0x8,%rdx
+   7ef7c:	75 72                	jne    7eff0 <strcat+0x1a0> # if we do not jump we know the substring considered has no \0 chracter in it
+   7ef7e:	48 89 02             	mov    %rax,(%rdx)          # we start copying it to *dest
+   7ef81:	48 83 c2 08          	add    $0x8,%rdx            # increment the offset of dest to after the characters we just copied
+
+# the next block repeats the previos 9 lines for 3 more times
    7ef85:	48 8b 06             	mov    (%rsi),%rax
    7ef88:	48 83 c6 08          	add    $0x8,%rsi
    7ef8c:	49 89 c1             	mov    %rax,%r9
@@ -142,23 +144,26 @@
    7efd6:	49 31 c1             	xor    %rax,%r9
    7efd9:	4d 09 c1             	or     %r8,%r9
    7efdc:	49 ff c1             	inc    %r9
-   7efdf:	75 0f                	jne    7eff0 <strcat+0x1a0>
+   7efdf:	75 0f                	jne    7eff0 <strcat+0x1a0>     
    7efe1:	48 89 02             	mov    %rax,(%rdx)
    7efe4:	48 83 c2 08          	add    $0x8,%rdx
-   7efe8:	e9 73 ff ff ff       	jmpq   7ef60 <strcat+0x110>
-   7efed:	0f 1f 00             	nopl   (%rax)
-   7eff0:	88 02                	mov    %al,(%rdx)
-   7eff2:	84 c0                	test   %al,%al
-   7eff4:	74 12                	je     7f008 <strcat+0x1b8>
-   7eff6:	48 ff c2             	inc    %rdx
-   7eff9:	88 22                	mov    %ah,(%rdx)
-   7effb:	84 e4                	test   %ah,%ah
-   7effd:	74 09                	je     7f008 <strcat+0x1b8>
-   7efff:	48 ff c2             	inc    %rdx
-   7f002:	48 c1 e8 10          	shr    $0x10,%rax
-   7f006:	eb e8                	jmp    7eff0 <strcat+0x1a0>
-   7f008:	48 89 f8             	mov    %rdi,%rax
-   7f00b:	c3                   	retq   
+   7efe8:	e9 73 ff ff ff       	jmpq   7ef60 <strcat+0x110> #go to the top of the loop
+
+
+   7efed:	0f 1f 00             	nopl   (%rax)       # no operation
+# we know that in rax there is \0 and we need to copy until lwe get to it
+   7eff0:	88 02                	mov    %al,(%rdx)   # we copy the first char of rax
+   7eff2:	84 c0                	test   %al,%al      # we check if it was null
+   7eff4:	74 12                	je     7f008 <strcat+0x1b8> #if it is we are done
+   7eff6:	48 ff c2             	inc    %rdx         # otherwise we increment the destination poitner
+   7eff9:	88 22                	mov    %ah,(%rdx)   # we copy the second character of rax
+   7effb:	84 e4                	test   %ah,%ah      # we check if the second character is \0
+   7effd:	74 09                	je     7f008 <strcat+0x1b8>     #if so we are done
+   7efff:	48 ff c2             	inc    %rdx         # if now we increase the destination pointer
+   7f002:	48 c1 e8 10          	shr    $0x10,%rax   # we shift our register so that the last for character of out string are in the least significants bits
+   7f006:	eb e8                	jmp    7eff0 <strcat+0x1a0> #and we go back to checking and, possibly, copying them
+   7f008:	48 89 f8             	mov    %rdi,%rax    # copy the destination pointer into the return register
+   7f00b:	c3                   	retq                # we return our string
    7f00c:	90                   	nop
    7f00d:	90                   	nop
    7f00e:	90                   	nop
