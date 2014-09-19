@@ -1,28 +1,30 @@
 
 000000000007ee50 <strcat>:
-   7ee50:	48 89 f9             	mov    %rdi,%rcx
-   7ee53:	83 e1 07             	and    $0x7,%ecx
-   7ee56:	48 89 f8             	mov    %rdi,%rax
-   7ee59:	49 b8 ff fe fe fe fe 	mov    $0xfefefefefefefeff,%r8
+   7ee50:	48 89 f9             	mov    %rdi,%rcx    # copy dest to rcx 
+   7ee53:	83 e1 07             	and    $0x7,%ecx    # check whether dest is 8-byte alligned
+   7ee56:	48 89 f8             	mov    %rdi,%rax    # copy dest to rax
+   7ee59:	49 b8 ff fe fe fe fe 	mov    $0xfefefefefefefeff,%r8  # moving magic string to r8
    7ee60:	fe fe fe 
-   7ee63:	74 1b                	je     7ee80 <strcat+0x30>
-   7ee65:	f7 d9                	neg    %ecx
-   7ee67:	83 c1 08             	add    $0x8,%ecx
-   7ee6a:	80 38 00             	cmpb   $0x0,(%rax)
-   7ee6d:	0f 84 c2 00 00 00    	je     7ef35 <strcat+0xe5>
-   7ee73:	48 ff c0             	inc    %rax
-   7ee76:	ff c9                	dec    %ecx
-   7ee78:	75 f0                	jne    7ee6a <strcat+0x1a>
-   7ee7a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
-   7ee80:	48 8b 08             	mov    (%rax),%rcx
-   7ee83:	48 83 c0 08          	add    $0x8,%rax
-   7ee87:	4c 89 c2             	mov    %r8,%rdx
-   7ee8a:	48 01 ca             	add    %rcx,%rdx
-   7ee8d:	73 61                	jae    7eef0 <strcat+0xa0>
-   7ee8f:	48 31 ca             	xor    %rcx,%rdx
-   7ee92:	4c 09 c2             	or     %r8,%rdx
-   7ee95:	48 ff c2             	inc    %rdx
-   7ee98:	75 56                	jne    7eef0 <strcat+0xa0>
+   7ee63:	74 1b                	je     7ee80 <strcat+0x30> # if 8-byte aligned jump to 74480
+   7ee65:	f7 d9                	neg    %ecx                # flip ecx
+   7ee67:	83 c1 08             	add    $0x8,%ecx           # make all but the last 3 bits of ecx back to 0 (undoing the flips by neg)
+   7ee6a:	80 38 00             	cmpb   $0x0,(%rax)          # check if dest[i] is 0
+   7ee6d:	0f 84 c2 00 00 00    	je     7ef35 <strcat+0xe5>  # if so jump to 8 character \0 search
+   7ee73:	48 ff c0             	inc    %rax                 # increment rax, that is we now look at dest[i+1]
+   7ee76:	ff c9                	dec    %ecx                 # decrement ecx 
+   7ee78:	75 f0                	jne    7ee6a <strcat+0x1a>  # if ecx is now 0 it means that the last 3 bits of &dest[i] are 110
+   7ee7a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)     # no operation
+   7ee80:	48 8b 08             	mov    (%rax),%rcx          # copy dest[i:i+7] to rcx
+   7ee83:	48 83 c0 08          	add    $0x8,%rax            # i = i+8
+   7ee87:	4c 89 c2             	mov    %r8,%rdx             # put our magic string in rdx
+   7ee8a:	48 01 ca             	add    %rcx,%rdx            # add our magic string to the substring we copied in rcx
+   7ee8d:	73 61                	jae    7eef0 <strcat+0xa0>  # jump if we did not carry in our magic addition (i.e. if the last carachter was \0)
+   7ee8f:	48 31 ca             	xor    %rcx,%rdx            # (str+magic) xor magic
+   7ee92:	4c 09 c2             	or     %r8,%rdx             # magic | [(str+magic) xor magic]
+   7ee95:	48 ff c2             	inc    %rdx                 # magic | [(str+magic) xor magic] + 1 
+   7ee98:	75 56                	jne    7eef0 <strcat+0xa0>  # if the thing on the last line != 0 jumo to 8 character \0 search
+
+#The next block repeats the previous 9 lines 4 times
    7ee9a:	48 8b 08             	mov    (%rax),%rcx
    7ee9d:	48 83 c0 08          	add    $0x8,%rax
    7eea1:	4c 89 c2             	mov    %r8,%rdx
@@ -49,18 +51,21 @@
    7eedd:	48 31 ca             	xor    %rcx,%rdx
    7eee0:	4c 09 c2             	or     %r8,%rdx
    7eee3:	48 ff c2             	inc    %rdx
-   7eee6:	74 98                	je     7ee80 <strcat+0x30>
-   7eee8:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+   7eee6:	74 98                	je     7ee80 <strcat+0x30>  # go back to the beginning of the loopd and take the next 8 characters
+
+# Here we do 8 character \0 search
+   7eee8:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)     # no operation
    7eeef:	00 
-   7eef0:	48 83 e8 08          	sub    $0x8,%rax
-   7eef4:	84 c9                	test   %cl,%cl
-   7eef6:	74 3d                	je     7ef35 <strcat+0xe5>
-   7eef8:	48 ff c0             	inc    %rax
-   7eefb:	84 ed                	test   %ch,%ch
-   7eefd:	74 36                	je     7ef35 <strcat+0xe5>
-   7eeff:	48 ff c0             	inc    %rax
-   7ef02:	f7 c1 00 00 ff 00    	test   $0xff0000,%ecx
-   7ef08:	74 2b                	je     7ef35 <strcat+0xe5>
+# we now know that in the last block of 8 characters there is at least one \0 but we need to find the first instance
+   7eef0:	48 83 e8 08          	sub    $0x8,%rax            # i = i-8 
+   7eef4:	84 c9                	test   %cl,%cl              # check if the first letter in our chunk is \0
+   7eef6:	74 3d                	je     7ef35 <strcat+0xe5>  # if it is jump to copying
+   7eef8:	48 ff c0             	inc    %rax                 # i = i+1 
+   7eefb:	84 ed                	test   %ch,%ch              # check if the second letter is \0
+   7eefd:	74 36                	je     7ef35 <strcat+0xe5>  # if so jump to copying
+   7eeff:	48 ff c0             	inc    %rax                 # i = i+1 
+   7ef02:	f7 c1 00 00 ff 00    	test   $0xff0000,%ecx       # check if the third letter is \0
+   7ef08:	74 2b                	je     7ef35 <strcat+0xe5>  #
    7ef0a:	48 ff c0             	inc    %rax
    7ef0d:	f7 c1 00 00 00 ff    	test   $0xff000000,%ecx
    7ef13:	74 20                	je     7ef35 <strcat+0xe5>
