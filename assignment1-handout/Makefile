@@ -21,6 +21,9 @@ perf.o: perf.c perf.h
 func_time.o: func_time.c func_time.h
 	$(CC) $(CFLAGS) -c func_time.c
 
+cachemiss: cachemiss.c perf.h perf.o
+	$(CC) $(CFLAGS) -o cachemiss cachemiss.c perf.o $(LFLAGS)
+
 submit:
 	tar cvzf submission.tar.gz writeup.txt func_time.c strcat-x64-annotated.dis strcat\_opt.c pintool
 
