@@ -29,7 +29,7 @@
 
 class Set {
     public:
-        int tag[2];
+        ADDRINT tag[2];
         int lru;
 };
 
@@ -48,7 +48,9 @@ class Cache {
         int indexBits;
         int blockBits;
 
-        Cache(int associativity, int cache_size, int line_size, int cache_miss) {
+        Cache() {}
+
+        void update(int associativity, int cache_size, int line_size, int cache_miss) {
             assoc = associativity;
             cacheSize = cache_size;
             lineSize = line_size;
@@ -78,6 +80,22 @@ class Cache {
             std::cout << "tag mask\t\t" << a << std::endl;
             std::cout << "index mask\t\t" << b << std::endl;
             std::cout << "block mask\t\t" << c << std::endl;
+
+            ADDRINT iAddrTag = maskTag & iaddr;
+            ADDRINT iAddrIndex = ((ADDRINT)maskIndex & iaddr) >> (blockBits);
+            ADDRINT iAddrBlock = maskBlock & iaddr;
+
+            std::bitset<64> d(iAddrTag);
+            std::bitset<64> e(iAddrIndex);
+            std::bitset<64> f(iAddrBlock);
+            std::bitset<64> g(iaddr);
+
+            std::cout << "iaddr\t\t\t" << g << std::endl;
+            std::cout << "tag\t\t\t" << d << std::endl;
+            std::cout << "index\t\t\t" << e << std::endl;
+            std::cout << "block\t\t\t" << f << "\n\n" << std::endl;
+
+
 
             return true;
         }

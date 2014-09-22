@@ -8,6 +8,7 @@
 
 std::ofstream outFile;
 long long int counter = 0;
+Cache c;
 
 VOID countInstruction()
 {
@@ -16,8 +17,8 @@ VOID countInstruction()
 
 VOID instruction(INS ins, void *v) 
 {
-    //const ADDRINT iaddr = INS_Address(ins);
-    //const UINT32 instId = profile.Map(iaddr);
+    const ADDRINT iaddr = INS_Address(ins);
+    c.addToCache(iaddr);
 
     INS_InsertPredicatedCall(
             ins, IPOINT_BEFORE, (AFUNPTR) countInstruction,
@@ -35,9 +36,7 @@ VOID fini(int code, VOID *v)
 int main(int argc, char *argv[])
 {
 
-    Cache c(2, 64, 8, 0);
-    ADDRINT iaddr = 0;
-    c.addToCache(iaddr); 
+    c.update(2, 64, 8, 0);
     PIN_InitSymbols();
 
     if( PIN_Init(argc,argv) )
