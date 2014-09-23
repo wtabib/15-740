@@ -13,34 +13,13 @@ long long int dCacheMiss = 0;
 Cache iCache, dCache;
 std::vector<PC> dCachePC, iCachePC;
 
-VOID iCacheCount(ADDRINT iaddr)
+VOID iCacheCount(ADDRINT iaddr, UINT32 idx)
 {
     counter++;
-    int idx = 0;
-    bool foundIdx = false;
-    for (unsigned int i = 0; i < iCachePC.size(); i++) {
-        if (iCachePC[i].pc == iaddr) {
-            foundIdx = true;
-            idx = i;
-            break;
-        }
-    }
-
-    if (!foundIdx) {
-        struct PC item;
-        item.refs = 1;
-        item.miss = 0;
-        item.pc = iaddr;
-        iCachePC.push_back(item);
-        idx = iCachePC.size()-1;
-    }
-    else {
-        iCachePC[idx].refs++;
-    }
-
     //TODO: memory vs. instruction
     //add data structure to assign blame
     int numBytes = 16;
+    iCachePC[idx].refs++;
     for (int i = 0; i < numBytes; i++) {
         bool hit = iCache.doCacheStuff(iaddr+i);
         if (!hit) {
@@ -48,7 +27,6 @@ VOID iCacheCount(ADDRINT iaddr)
             iCacheMiss++;
         }
     }
-
 }
 
 VOID dCacheCount(ADDRINT iaddr, ADDRINT op, UINT32 opSize)
@@ -79,10 +57,21 @@ VOID instruction(INS ins, void *v)
 
     const ADDRINT iaddr = INS_Address(ins);
 
+    UINT32 idx;
+   struct PC item;
+   item.refs = 0;
+   item.miss = 0;
+   item.pc = iaddr;
+   iCachePC.push_back(item);
+   idx = iCachePC.size() - 1;
+
+
     INS_InsertPredicatedCall(
             ins, IPOINT_BEFORE, (AFUNPTR) iCacheCount,
             IARG_ADDRINT,
             iaddr,
+            IARG_UINT32,
+            idx,
             IARG_END);
 
     if (INS_IsMemoryRead(ins)) {
