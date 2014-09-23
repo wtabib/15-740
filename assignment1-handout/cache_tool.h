@@ -27,6 +27,13 @@
 
 #define MAX_SETS    256
 
+struct PC {
+    bool isLoad; 
+    unsigned int refs;
+    unsigned int miss;
+    ADDRINT pc;
+};
+
 class Set {
     public:
         ADDRINT tag[2];

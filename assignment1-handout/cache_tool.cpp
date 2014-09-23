@@ -11,16 +11,40 @@ long long int counter = 0;
 long long int iCacheMiss = 0;
 long long int dCacheMiss = 0;
 Cache iCache, dCache;
+std::vector<PC> dCachePC, iCachePC;
 
 VOID iCacheCount(ADDRINT iaddr)
 {
     counter++;
+    int idx = 0;
+    bool foundIdx = false;
+    for (unsigned int i = 0; i < iCachePC.size(); i++) {
+        if (iCachePC[i].pc == iaddr) {
+            foundIdx = true;
+            idx = i;
+            break;
+        }
+    }
+
+    if (!foundIdx) {
+        struct PC item;
+        item.refs = 1;
+        item.miss = 0;
+        item.pc = iaddr;
+        iCachePC.push_back(item);
+        idx = iCachePC.size()-1;
+    }
+    else {
+        iCachePC[idx].refs++;
+    }
+
     //TODO: memory vs. instruction
     //add data structure to assign blame
     int numBytes = 16;
     for (int i = 0; i < numBytes; i++) {
         bool hit = iCache.doCacheStuff(iaddr+i);
         if (!hit) {
+            iCachePC[idx].miss++;
             iCacheMiss++;
         }
     }
