@@ -31,8 +31,14 @@ struct PC {
     bool isLoad; 
     unsigned int refs;
     unsigned int miss;
+    unsigned int loadMisses;
+    unsigned int storeMisses;
     ADDRINT pc;
 };
+
+bool myfunction (PC i, PC j) {
+    return (i.miss > j.miss);
+}
 
 class Set {
     public:

@@ -5,6 +5,8 @@
 #include "pin_profile.H"
 
 #include "cache_tool.h"
+#include <algorithm>
+#include <vector>
 
 std::ofstream outFile;
 long long int counter = 0;
@@ -29,9 +31,11 @@ VOID iCacheCount(ADDRINT iaddr, UINT32 idx)
     }
 }
 
-VOID dCacheCount(ADDRINT iaddr, ADDRINT op, UINT32 opSize)
+// if isLoad == 0 it's a store, if isLoad == 1 it's a load
+VOID dCacheCount(ADDRINT iaddr, ADDRINT op, UINT32 opSize, UINT32 idx, UINT32 isLoad)
 {
     UINT32 numBytes = opSize;
+    dCachePC[idx].refs++;
     for (unsigned int i = 0; i < numBytes; i++) {
         bool hit = dCache.doCacheStuff(op+i);
         if (!hit) {
@@ -81,6 +85,10 @@ VOID instruction(INS ins, void *v)
                 iaddr,
                 IARG_MEMORYREAD_EA,
                 IARG_MEMORYREAD_SIZE,
+                IARG_UINT32,
+                idx,
+                IARG_UINT32,
+                1,
                 IARG_END);
 
         if (INS_HasMemoryRead2(ins)) {
@@ -90,9 +98,11 @@ VOID instruction(INS ins, void *v)
                     iaddr,
                     IARG_MEMORYREAD2_EA,
                     IARG_MEMORYREAD_SIZE,
+                    IARG_UINT32,
+                    idx,
+                    IARG_UINT32,
+                    1,
                     IARG_END);
-
-
         }
 
     }
@@ -103,6 +113,10 @@ VOID instruction(INS ins, void *v)
                 iaddr,
                 IARG_MEMORYWRITE_EA,
                 IARG_MEMORYWRITE_SIZE,
+                IARG_UINT32,
+                idx,
+                IARG_UINT32,
+                0,
                 IARG_END);
     }
 
@@ -115,6 +129,31 @@ VOID fini(int code, VOID *v)
     std::cout << "INSTRUCTION EXECUTION\t\t\t" << counter << std::endl;
     std::cout << "iCACHE MISSES\t\t\t\t" << iCacheMiss << std::endl;
     std::cout << "dCACHE MISSES\t\t\t\t" << dCacheMiss << std::endl;
+
+    ////////////////////// iCache printing /////////////////////////////
+    std::cout << "\niCACHE" << std::endl;
+    std::sort(iCachePC.begin(), iCachePC.end(), myfunction);
+    std::cout << "pc \t\t refs \t\t miss\t\t contribution \t total cycles \t miss rate" << std::endl;
+    for (int i = 0; i < iCachePC.size(); i++) {
+        double contribution = iCachePC[i].miss/((double)iCacheMiss);
+        double missRate = iCachePC[i].miss/((double)iCachePC[i].refs);
+        std::cout << ((void *) iCachePC[i].pc) << "\t" << iCachePC[i].refs << "\t" <<
+            iCachePC[i].miss << "\t" << contribution << "%\t" << iCachePC[i]*1 << "\t" << missRate << "%\t" << std::endl;
+        //TODO: replace the above 1 with number of cycles
+    }
+
+    ////////////////////// dCache printing /////////////////////////////
+    std::cout << "\niCACHE" << std::endl;
+    std::sort(iCachePC.begin(), iCachePC.end(), myfunction);
+    std::cout << "pc \t\t refs \t\t miss\t\t contribution \t total cycles \t miss rate" << std::endl;
+    for (int i = 0; i < iCachePC.size(); i++) {
+        double contribution = iCachePC[i].miss/((double)iCacheMiss);
+        double missRate = iCachePC[i].miss/((double)iCachePC[i].refs);
+        std::cout << ((void *) iCachePC[i].pc) << "\t" << iCachePC[i].refs << "\t" <<
+            iCachePC[i].miss << "\t" << contribution << "%\t" << iCachePC[i]*1 << "\t" << missRate << "%\t" << std::endl;
+        //TODO: replace the above 1 with number of cycles
+    }
+
 }
 
 
