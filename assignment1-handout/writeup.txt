@@ -148,3 +148,41 @@ address.  We keep accessing unaligned bytes.
 
 Problem 9:
 
+Part 1:
+
+The first benchmark (which is in patho1.c) creates two large arrays and fills
+them with random numbers.  Then, in two for loops we access the two arrays at
+each iteration of the loop and sum the inputs of the arrays.  At the end of the
+for loop we subtract the two sums and return the result.  The goal of this
+benchmark is to stress the cache as much as possible by filling the cache
+repeatedly and then accessing new elements.
+
+The second benchmark (which is in patho2.c) creates two large arrays, fills
+them with random numbers, and then instead of a sequential access (like in
+patho1.c) performs a random access from the two arrays and sums the contents of
+the arrays.  The random number is computed by starting with a prime number,
+squaring it, and then modding by the size of the array.  At the end the two
+sums are subtracted and the result is returned.  The goal of this benchmark is
+to cause as many cache misses as possible by randomly accessing elements in the
+array.  The misses in this benchmark should be fewer than in the first
+pathological case because accessing randomly has a greater chance of hitting
+than in the first case.
+
+We compared the output of our profiling tool to pin's dcache.  The output of
+our profiling tool is in patho1.txt and patho2.txt.  The output of pin's dcache
+is in dcache1.out and dcache2.out.
+
+Since dcache is only able to measure data cache misses we only compared between
+our dcache misses and pin's dcache.so data cache misses. While not exactly the
+same, they are very close to our results.
+
+First case:
+Ours            Pin
+12476152        12471065
+
+Second Case
+Ours            Pin
+5898            6082
+
+Part 2:
+

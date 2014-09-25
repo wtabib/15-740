@@ -15,6 +15,18 @@ long long int dCacheMiss = 0;
 Cache iCache, dCache;
 std::vector<PC> dCachePC, iCachePC;
 
+KNOB<UINT32> KnobLineSize(KNOB_MODE_WRITEONCE, "pintool", 
+        "lz", "64", "line size in bytes");
+
+KNOB<UINT32> KnobCacheSize(KNOB_MODE_WRITEONCE, "pintool", 
+        "cz", "8", "cache size in kilobytes");
+
+KNOB<UINT32> KnobMissCycles(KNOB_MODE_WRITEONCE, "pintool", 
+        "mp", "100", "miss penalty in cycles");
+
+KNOB<UINT32> KnobAssoc(KNOB_MODE_WRITEONCE, "pintool", 
+        "a", "1", "1 is direct-mapped, 2 is set associative");
+
 VOID iCacheCount(ADDRINT iaddr, UINT32 idx)
 {
     counter++;
@@ -161,7 +173,7 @@ VOID fini(int code, VOID *v)
         double contribution = iCachePC[i].miss/((double)iCacheMiss);
         double missRate = iCachePC[i].miss/((double)iCachePC[i].refs);
         std::cout << ((void *) iCachePC[i].pc) << "\t" << iCachePC[i].refs << "\t" <<
-            iCachePC[i].miss << "\t" << contribution << "%\t" << iCachePC[i].miss*100 << "\t" << missRate << "%\t" << std::endl;
+            iCachePC[i].miss << "\t" << contribution << "%\t" << iCachePC[i].miss*KnobMissCycles.Value()<< "\t" << missRate << "%\t" << std::endl;
         //TODO: replace the above 1 with number of cycles
     }
 
@@ -173,7 +185,7 @@ VOID fini(int code, VOID *v)
         double contribution = dCachePC[i].miss/((double)dCacheMiss);
         double missRate = dCachePC[i].miss/((double)dCachePC[i].refs);
         std::cout << ((void *) dCachePC[i].pc) << "\t" << dCachePC[i].refs << "\t" <<
-            dCachePC[i].isLoad << "\t" << dCachePC[i].miss << "\t" << contribution << "%\t" << dCachePC[i].miss*100 << "\t" << missRate << "%\t" << std::endl;
+            dCachePC[i].isLoad << "\t" << dCachePC[i].miss << "\t" << contribution << "%\t" << dCachePC[i].miss*KnobMissCycles.Value()<< "\t" << missRate << "%\t" << std::endl;
         //TODO: replace the above 1 with number of cycles
     }
 
@@ -183,8 +195,6 @@ VOID fini(int code, VOID *v)
 int main(int argc, char *argv[])
 {
 
-    iCache.update(2, 8*1024, 64, 0);
-    dCache.update(2, 8*1024, 64, 0);
     PIN_InitSymbols();
 
     if( PIN_Init(argc,argv) )
@@ -192,6 +202,8 @@ int main(int argc, char *argv[])
         std::cout << "you fucked up" << std::endl;
     }
 
+    iCache.update(KnobAssoc.Value(), KnobCacheSize.Value()*1024, KnobLineSize.Value(), KnobMissCycles.Value());
+    dCache.update(KnobAssoc.Value(), KnobCacheSize.Value()*1024, KnobLineSize.Value(), KnobMissCycles.Value());
 
     //outFile.open(KnobOutputFile.Value().c_str());
 
