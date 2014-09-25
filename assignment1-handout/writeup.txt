@@ -1,3 +1,8 @@
+Vittorio Perera         vdperera
+Joseph Tassarotti       jtassaro
+Wennie Tabib            wtabib
+
+
 Problem 1:
 
 1a) In the worst case, the measurement error will be 199.  In the best
@@ -185,4 +190,96 @@ Ours            Pin
 5898            6082
 
 Part 2:
+
+The results for each of the configurations and each test can be found in the
+following files:
+
+MMM.out:
+    Configuration1: MMM1.txt
+    Configuration2: MMM2.txt
+    Configuration3: MMM3.txt
+    Configuration4: MMM4.txt
+
+NN.out
+    Configuration1: NN1.txt
+    Configuration2: NN2.txt
+    Configuration3: NN3.txt
+    Configuration4: NN4.txt
+
+Norm1.out
+    Configuration1: Norm11.txt
+    Configuration2: Norm12.txt
+    Configuration3: Norm13.txt
+    Configuration4: Norm14.txt
+
+Norm2.out
+    Configuration1: Norm21.txt
+    Configuration2: Norm22.txt
+    Configuration3: Norm23.txt
+    Configuration4: Norm24.txt
+
+In general, the number of data cache misses between configurations 3 and 4
+should significantly decrease because configuration 4's cache is 4x as large as
+configuration 3's cache.
+
+MMM.out
+
+Configuration 1 has more misses than configuration 2 which makes sense because
+least recently used policy of configuration 2 allows us to better exploit
+locality.  There's a slight decrease in the number of misses in Configuration 3
+over Configuration 2.  The instruction cache is much less because having a
+bigger line size allows us t ohave fewer instructions that go over a border.
+This is particularly evident as the icache miss decreases much more than the
+dcache miss.  Configuration 4 has much fewer icache misses than configuration 3
+and almost the same dcache misses as configuration 3.  This is surprising
+because we would expect the increased cache size to reduce the dcache misses
+significantly as well.  There are a few possible reasons for this.  One is that
+the capacity is still not enough (not very likely).  Another possibility is
+that there are conflict misses occuring because several blocks are being mapped
+to the same set which is causing collision misses.
+
+NN.out:
+There is more locality in this example than MMM.out because if we're computing
+the nearest neighbor average of a pixel value at location <i,j> then at the
+next iteration of the loop this value is usually a neighbor of the next pixel
+<i,j+1>.  However, there are significantly more icache misses between MMM1.txt
+and NN1.txt when compared to the number of executed instructions in the
+program.  Configuration 2 seems to worse performance for the dcache and better
+performance for the icache than configuration 1.  This is the case because in
+the 2-way set associative dcache replacement policy ejects the elements that
+are actually need.  a[i][j] is the first element accessed and it is also needed
+at the next iteration.  Unfortunately, after all the add operations have been
+performed it also the least recently used and is therefore evicted.
+Configuration 3 has a huge decrease in dcache misses when compared to
+configuration 2 because the line size is larger which causes fewer misses since
+we're accessing sequential elements (a[i][j], a[i][j+1], a[i][j-1]).  By
+similar reasoning to what happened with MMM.out we have fewer icache misses and
+dcache misses.
+
+Norm1.out:
+The results of configurations 1 and 2 are similar even though configuration 2
+has a 2-way set associative cache.  Apparently, for computing the froebenius
+norm associativity doesn't help much.  This might be because we have very high
+spatial locality because we're accessing the elements one after the other
+without jumping around the array like we were in NN.out.  The dcache misses in
+configuration 3 are much higher than in configuration 2 because we are doubling
+the line size but the cache size stays the same. This means that, if the stores
+we are making do not take more then one line in configuration 2, we're
+effectively halving the cache size.  For configuration 4 the number of icache
+misses significantly decreases and the number of dcache misses stays
+approximately the same.
+
+Norm2.out
+Compared to Norm1, Norm2 accesses elements in column-major order.  This affects
+the dcache misses because our spatial locality is much worse.  The icache is
+much less affected by this difference.  The configuration 1 and 2 have almost
+the same dcache miss numbers.  The icache misses for configuration 2 is
+slightly lower because of the 2-way set associative caching.  Configuration 3
+has almsot the same number of dcache misses again due to the poor spatial
+locality.  However, there are about half as many icache misses because the line
+size is 2x as large in configuration 3 as configuration 2.  Even in
+configuration 4 the number of dcache misses doesn't decrease much because a
+larger cache can't overcome the poor spatial locality of this program.  However
+the logic of the program doesn't affect the locality of the icache.  The icache
+misses decrease as the size of the cache increases.
 
