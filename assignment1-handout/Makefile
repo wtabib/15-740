@@ -40,7 +40,7 @@ patho2: patho2.c
 	$(CC) -g $(CFLAGS) -o patho2 patho2.c $(LFLAGS)
 
 submit:
-	tar cvzf submission.tar.gz writeup.txt func_time.c strcat-x64-annotated.dis strcat\_opt.c pintool
+	tar cvzf submission.tar.gz writeup.txt func_time.c strcat-x64-annotated.dis strcat\_opt.c pintool strcat_naive_annotated.s
 
 clean:
 	rm -f *.o example freq *~
