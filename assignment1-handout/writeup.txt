@@ -116,7 +116,10 @@ The output of our program is:
 total cache misses for thing1 = 2925.300049
 total cache misses for thing2 = 9.200000
 
-thing2 accesses the same small piece of memory repeatedly.  It exploits way more locality than thing1. In contrast, thing1 accesses a much larger block of memory and doesn't access the same element repeatedly so it has more misses as it has to load each section of the array.   
+thing2 accesses the same small piece of memory repeatedly.  It exploits way
+more locality than thing1. In contrast, thing1 accesses a much larger block of
+memory and doesn't access the same element repeatedly so it has more misses as
+it has to load each section of the array.   
 
 Problem 6:
 
@@ -125,10 +128,23 @@ See strcat_x64.dis and strcat_naive.s
 Problem 7:
 
 Timer:
-For very small strings the difference between the two is minimal.  
-As a string gets very long the difference between the optimized and naive implementations becomes larger (the optimized one is comparatively faster).
+For very small strings the difference between the two is minimal.  As a string
+gets very long the difference between the optimized and naive implementations
+becomes larger (the optimized one is comparatively faster).
 
 Cache:
 There are very few cache misses.  
 When it's also not aligned the benefit is not as great.
 The thing is in memory, the cache line is huge, so there won't be many misses.  
+
+Problem 8:
+Our c code casts the string pointer to an unsigned long long pointer so that it
+loads 8 bytes of the string at a time and then uses bit operations to find
+where the '\0' occurs in each 8 byte chunk.  By doing this we're able to
+consistently outperform the naive implementation.  On the other hand, we're
+only able to beat the glibc strcat on small, aligned strings.  The problem is
+that the assembly code before loading 8 bytes at a time first aligns the
+address.  We keep accessing unaligned bytes.
+
+Problem 9:
+

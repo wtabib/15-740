@@ -168,16 +168,16 @@ int main(void)
 
         for (j = 0; j < 3; j++) {
             if (j == 0) {
-                concat= strcatWrapper;
-                printf("glibc strcat\n");
+                concat = optStrcatWrapper;
+                printf("optimized strcat\n");
             }
             else if (j == 1) {
                 concat= naiveStrcatWrapper;
                 printf("naive strcat\n");
             }
             else {
-                concat = optStrcatWrapper;
-                printf("optimized strcat\n");
+                concat= strcatWrapper;
+                printf("glibc strcat\n");
             }
 
 
