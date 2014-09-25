@@ -14,7 +14,7 @@ int main() {
   mystring[2] = '\0';
 
 
-  strcat(mystring+7, mystring2);
+  __GI_strcat(mystring+7, mystring2);
   printf("%s", mystring+7);
 }
  

@@ -79,7 +79,7 @@ long double compute_actual_time(test_funct P){
      }
 
      
-     printf("time_difference/n = %.10Lf\n", time_difference/n);
+     //printf("time_difference/n = %.10Lf\n", time_difference/n);
      
      return time_difference/n;
 }
@@ -87,13 +87,14 @@ long double compute_actual_time(test_funct P){
 long double func_time_generic(timer_init_funct init, timer_elapsed_funct elapsed,
                               test_funct P, long double E) {
 
-    long double delta = compute_resolution(init, elapsed);
+    //long double delta = compute_resolution(init, elapsed);
+    long double delta = 4e-3;
     long double threshold = 2.0*delta/E + delta;
 
   
-    printf("Error bound: %Lf\n", E);
-    printf("Delta: %Le\n", delta);
-    printf("Threshold: %Lf\n", threshold);
+    //printf("Error bound: %Lf\n", E);
+    //printf("Delta: %Le\n", delta);
+    //printf("Threshold: %Lf\n", threshold);
 
     long int n = 1;
     while(1) {
@@ -127,7 +128,7 @@ long double func_time(test_funct P, long double E) {
 long double func_time_hw(test_funct P, long double E) {
     struct timespec res;
     clock_getres(4, &res);
-    printf("Real res for hw timer: %ld\n", res.tv_nsec);
+    //printf("Real res for hw timer: %ld\n", res.tv_nsec);
     long double result = func_time_generic(init_etime_hw, get_etime_hw, P, E);
     return result;
 }

@@ -1,18 +1,134 @@
+Problem 1:
+
 1a) In the worst case, the measurement error will be 199.  In the best
 case the measurement error is 1.  
-If we start exactly on the tick, the delta period ends exactly on the
-tick and we have some error because it ends up taking a whole tick.  If
-we don’t end exactly on the tick, then the measurement isn’t exact and
-we get some error.
+Either it stretches the border of a tick or fits in the duration of a 
+tick.  If it fits, we get a measurement of 0 so the error is 1.
+If it goes over then we measure delta.  We claim it takes 10 ms which 
+means it's off by a lot.
+
 
 ((1/(2*10^4)) - 1/(10^2))/(1/(2*10^4)) = 199
 
-1b)  In this case the additions take half a second and there are 50
-deltas.  However, due to similar reasoning from (1a) it’s possible that
+1b)  In this case the additions take half a second and there are at least 
+50 deltas.  However, due to similar reasoning from (1a) it’s possible that
 we measure 51 deltas instead of 50.  
 Therefore, 
 
 best case = (0.5 - 50*0.01)/0.5 = 0
 worst case = (0.01/0.5) = 0.02
 
+Problem 2:
 
+// Initializes timer, does dummy operations till it notices elapsed
+// time is non zero and returns this. This is an upper bound on
+// delta.
+
+long double compute_resolution(timer_init_funct init, timer_elapsed_funct etime) {
+    init();
+    int n = 1;
+
+    long double ts = etime();
+    while(1) {
+        long double tc = etime();
+        long double diff =  tc - ts;
+        if(diff > 0) {
+            //printf("n = %d\n", n);
+            return diff;
+        }
+
+        int a = 0;
+        int j;
+        for (j = 0; j < n; j++) {
+            a += j;
+        }
+        n *= 2;
+    }
+}
+
+Problem 3:
+
+see func_time.c
+
+Problem 4:
+
+Our program calculated:
+The clock frequency is approximately 3868 Megahertz
+
+The output of /proc/cpuinfo is
+model name  : Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz
+
+Problem 5:
+
+Here are the two pieces of code that we ran. 
+Results follow this code.
+
+long long thing1() {
+
+   int i = 0;
+   int numElem = 15000000;
+   flushCache();
+   int* arr1 = (int *) malloc(numElem*sizeof(int));
+   int* arr2 = (int *) malloc(numElem*sizeof(int));
+   long long numMisses = 0;
+
+    start_cachemiss_count();
+    for (i = 0; i < numElem; i++) {
+        arr1[i] = i;
+        arr2[i] = numElem-i;
+
+        int elem = arr1[i];
+    }
+
+    numMisses = get_cachemiss_count();
+
+    //free(arr1);
+    //free(arr2);
+
+    return numMisses;
+}
+
+long long thing2() {
+
+   int i = 0;
+   int numElem = 15000000;
+   flushCache();
+   int* arr1 = (int *) malloc(numElem*sizeof(int));
+   int* arr2 = (int *) malloc(numElem*sizeof(int));
+   long long numMisses = 0;
+
+   start_cachemiss_count();
+
+   for (i = 0; i < numElem; i++) {
+        arr1[i%15] = i;
+        arr2[i%15] = numElem-i;
+        int elem = arr1[i%15];
+   }
+
+   numMisses = get_cachemiss_count();
+   //free(arr1);
+   //free(arr2);
+
+   return numMisses;
+}
+
+The output of our program is:
+total cache misses for thing1 = 2925.300049
+total cache misses for thing2 = 9.200000
+
+thing2 accesses the same small piece of memory repeatedly.  It exploits way more locality than thing1. In contrast, thing1 accesses a much larger block of memory and doesn't access the same element repeatedly so it has more misses as it has to load each section of the array.   
+
+Problem 6:
+
+See strcat_x64.dis and strcat_naive.s
+
+Problem 7:
+
+Timer:
+For very small strings the difference between the two is minimal.  
+As a string gets very long the difference between the optimized and naive implementations becomes larger (the optimized one is comparatively faster).
+
+Cache:
+There are very few cache misses.  
+When it's also not aligned the benefit is not as great.
+The thing is in memory, the cache line is huge, so there won't be many misses.  

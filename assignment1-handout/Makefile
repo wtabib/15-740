@@ -12,6 +12,9 @@ cache_tests: $(CACHE_TEST_TARGS)
 example: example.c perf.h perf.o
 	$(CC) $(CFLAGS) -o example example.c perf.o $(LFLAGS)
 
+strcat_test: strcat_test.c perf.h perf.o func_time.h func_time.o strcat_naive.h strcat_naive.o
+	$(CC) $(CFLAGS) -o strcat_test  strcat_test.c perf.o func_time.o strcat_naive.o $(LFLAGS)
+
 freq: freq.c perf.h func_time.h perf.o func_time.o
 	$(CC) $(CFLAGS) -o freq freq.c perf.o func_time.o $(LFLAGS)
 

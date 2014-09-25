@@ -32,13 +32,15 @@ VOID iCacheCount(ADDRINT iaddr, UINT32 idx)
 }
 
 // if isLoad == 0 it's a store, if isLoad == 1 it's a load
-VOID dCacheCount(ADDRINT iaddr, ADDRINT op, UINT32 opSize, UINT32 idx, UINT32 isLoad)
+VOID dCacheCount(ADDRINT iaddr, ADDRINT op, UINT32 opSize, UINT32 idx, UINT32 isLoad, UINT32 isSecondOp)
 {
     UINT32 numBytes = opSize;
-    dCachePC[idx].refs++;
+    if (! isSecondOp)
+        dCachePC[idx].refs++;
     for (unsigned int i = 0; i < numBytes; i++) {
         bool hit = dCache.doCacheStuff(op+i);
         if (!hit) {
+            dCachePC[idx].miss++;
             dCacheMiss++;
         }
     }
@@ -79,6 +81,13 @@ VOID instruction(INS ins, void *v)
             IARG_END);
 
     if (INS_IsMemoryRead(ins)) {
+        struct PC readItem;
+        readItem.refs = 0;
+        readItem.miss = 0;
+        readItem.pc = iaddr;
+        readItem.isLoad = 1;
+        dCachePC.push_back(readItem);
+        UINT32 idx2 = dCachePC.size()-1;
         INS_InsertPredicatedCall(
                 ins, IPOINT_BEFORE, (AFUNPTR) dCacheCount,
                 IARG_ADDRINT,
@@ -86,9 +95,11 @@ VOID instruction(INS ins, void *v)
                 IARG_MEMORYREAD_EA,
                 IARG_MEMORYREAD_SIZE,
                 IARG_UINT32,
-                idx,
+                idx2,
                 IARG_UINT32,
                 1,
+                IARG_UINT32,
+                0,
                 IARG_END);
 
         if (INS_HasMemoryRead2(ins)) {
@@ -99,7 +110,9 @@ VOID instruction(INS ins, void *v)
                     IARG_MEMORYREAD2_EA,
                     IARG_MEMORYREAD_SIZE,
                     IARG_UINT32,
-                    idx,
+                    idx2,
+                    IARG_UINT32,
+                    1,
                     IARG_UINT32,
                     1,
                     IARG_END);
@@ -107,6 +120,14 @@ VOID instruction(INS ins, void *v)
 
     }
     if (INS_IsMemoryWrite(ins)) {
+        struct PC writeItem;
+        writeItem.refs = 0;
+        writeItem.miss = 0;
+        writeItem.pc = iaddr;
+        writeItem.isLoad = 0;
+        dCachePC.push_back(writeItem);
+        UINT32 idx2 = dCachePC.size()-1;
+
          INS_InsertPredicatedCall(
                 ins, IPOINT_BEFORE, (AFUNPTR) dCacheCount,
                 IARG_ADDRINT,
@@ -114,7 +135,9 @@ VOID instruction(INS ins, void *v)
                 IARG_MEMORYWRITE_EA,
                 IARG_MEMORYWRITE_SIZE,
                 IARG_UINT32,
-                idx,
+                idx2,
+                IARG_UINT32,
+                0,
                 IARG_UINT32,
                 0,
                 IARG_END);
@@ -138,19 +161,19 @@ VOID fini(int code, VOID *v)
         double contribution = iCachePC[i].miss/((double)iCacheMiss);
         double missRate = iCachePC[i].miss/((double)iCachePC[i].refs);
         std::cout << ((void *) iCachePC[i].pc) << "\t" << iCachePC[i].refs << "\t" <<
-            iCachePC[i].miss << "\t" << contribution << "%\t" << iCachePC[i]*1 << "\t" << missRate << "%\t" << std::endl;
+            iCachePC[i].miss << "\t" << contribution << "%\t" << iCachePC[i].miss*100 << "\t" << missRate << "%\t" << std::endl;
         //TODO: replace the above 1 with number of cycles
     }
 
     ////////////////////// dCache printing /////////////////////////////
-    std::cout << "\niCACHE" << std::endl;
-    std::sort(iCachePC.begin(), iCachePC.end(), myfunction);
-    std::cout << "pc \t\t refs \t\t miss\t\t contribution \t total cycles \t miss rate" << std::endl;
-    for (int i = 0; i < iCachePC.size(); i++) {
-        double contribution = iCachePC[i].miss/((double)iCacheMiss);
-        double missRate = iCachePC[i].miss/((double)iCachePC[i].refs);
-        std::cout << ((void *) iCachePC[i].pc) << "\t" << iCachePC[i].refs << "\t" <<
-            iCachePC[i].miss << "\t" << contribution << "%\t" << iCachePC[i]*1 << "\t" << missRate << "%\t" << std::endl;
+    std::cout << "\ndCACHE" << std::endl;
+    std::sort(dCachePC.begin(), dCachePC.end(), myfunction);
+    std::cout << "pc \t\t refs \t\t isLoad? \t\t miss\t\t contribution \t total cycles \t miss rate" << std::endl;
+    for (int i = 0; i < dCachePC.size(); i++) {
+        double contribution = dCachePC[i].miss/((double)dCacheMiss);
+        double missRate = dCachePC[i].miss/((double)dCachePC[i].refs);
+        std::cout << ((void *) dCachePC[i].pc) << "\t" << dCachePC[i].refs << "\t" <<
+            dCachePC[i].isLoad << "\t" << dCachePC[i].miss << "\t" << contribution << "%\t" << dCachePC[i].miss*100 << "\t" << missRate << "%\t" << std::endl;
         //TODO: replace the above 1 with number of cycles
     }
 
