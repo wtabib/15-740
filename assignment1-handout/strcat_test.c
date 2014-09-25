@@ -4,6 +4,7 @@
 #include "func_time.h"
 #include "perf.h"
 #include "strcat_naive.h"
+#include "strcat_opt.h"
 
 #define BUFFER_SIZE 4096
 char buffer[BUFFER_SIZE];
@@ -30,6 +31,10 @@ void initialize_buffer(void)
 char *gSrc; char *gDst;
 void strcatWrapper() {
     strcat(gDst, gSrc);
+}
+
+void optStrcatWrapper() {
+    strcat_opt(gDst, gSrc);
 }
 
 void naiveStrcatWrapper() {
@@ -151,17 +156,29 @@ int main(void)
 
     /* Time calls to strcat of various lengths. */
     int i = 0, j = 0, k = 0;
-    for (i = 0; i < 2; i++) {
-        for (j = 0; j < 2; j++) {
-            if (i == 0) 
-                timer= func_time;
-            else
-                timer= func_time_hw;
+    for (i = 0; i < 1; i++) {
+        if (i == 0)  {
+            timer= func_time;
+            printf("regular timer\n");
+        }
+        else {
+            timer= func_time_hw;
+            printf("hardware timer\n");
+        }
 
-            if (j == 0)
+        for (j = 0; j < 3; j++) {
+            if (j == 0) {
                 concat= strcatWrapper;
-            else
+                printf("glibc strcat\n");
+            }
+            else if (j == 1) {
                 concat= naiveStrcatWrapper;
+                printf("naive strcat\n");
+            }
+            else {
+                concat = optStrcatWrapper;
+                printf("optimized strcat\n");
+            }
 
 
             //do_test(0, 1, 2048, 1, timer_main, concat_main);
