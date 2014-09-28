@@ -228,7 +228,7 @@ Configuration 1 has more misses than configuration 2 which makes sense because
 least recently used policy of configuration 2 allows us to better exploit
 locality.  There's a slight decrease in the number of misses in Configuration 3
 over Configuration 2.  The instruction cache is much less because having a
-bigger line size allows us t ohave fewer instructions that go over a border.
+bigger line size allows us to have fewer instructions that go over a border.
 This is particularly evident as the icache miss decreases much more than the
 dcache miss.  Configuration 4 has much fewer icache misses than configuration 3
 and almost the same dcache misses as configuration 3.  This is surprising
@@ -280,6 +280,6 @@ locality.  However, there are about half as many icache misses because the line
 size is 2x as large in configuration 3 as configuration 2.  Even in
 configuration 4 the number of dcache misses doesn't decrease much because a
 larger cache can't overcome the poor spatial locality of this program.  However
-the logic of the program doesn't affect the locality of the icache.  The icache
-misses decrease as the size of the cache increases.
+the stride pattern of the program doesn't affect the locality of the icache.
+The icache misses decrease as the size of the cache increases.
 
