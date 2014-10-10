@@ -3,19 +3,19 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define CMAX 1024L*1024L*1024L
-#define SMAX 25L
+#define CMAX 1024L*1024L*512L
+#define SMAX 256
 
 char* memory;
 
-int n, s;
+unsigned long long int n, s;
 
 void simple_measure(){
     double result = 0.0;
     volatile double sink;
-    int i;
+    unsigned long long int i;
     for (i=0; i<n; i++){
-        result = result + (double)memory[i*s];
+        result = result + (double)memory[(i*s)%(1024L*1024L*512L)];
     }
     sink = result;
 }
@@ -27,24 +27,24 @@ void main(int argc, char** argv){
 
     unsigned long long int tot;
     
-    memory = (char*)malloc(CMAX*SMAX);
+    memory = (char*)calloc(CMAX, 1);
     tot = SMAX;
     tot = tot * CMAX;
 
-    /*for(i=0; i<tot; i++){
-        memory[i] = (char)(i%256);
+    /*for(i=0; i<1024L*1024L*512L; i++){
+        memory[i] = 'a'; // (char)(i%256);
     }*/
 
     long double secs;
     unsigned long long int j;
-    for(j = 1024*1024*64; j<CMAX; j=j*2){
+    for(j = 1024L*1024L; j<CMAX; j=j*2){
 
-         for (i=1; i<SMAX; i++){
+         for (i=0; i<=SMAX; i=i+4){
              s = i;
              n = j;
          
              secs = func_time(simple_measure, 0.02); // - func_time(add_dummy, 0.02);
-             printf("%d\t %f\t %Le\n", s, log2(j), n/(secs*1e6));
+             printf("%Ld\t %f\t %Le\n", s, log2(j), n/(secs*1e6));
          }
     }
 
