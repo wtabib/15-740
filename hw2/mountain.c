@@ -37,7 +37,7 @@ void main(int argc, char** argv){
 
     long double secs;
     unsigned long long int j;
-    for(j = 1024L*1024L; j<CMAX; j=j*2){
+    for(j = 1024L; j<CMAX; j=j*4){
 
          for (i=0; i<=SMAX; i=i+4){
              s = i;
