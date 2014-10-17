@@ -3,7 +3,7 @@ AS = as
 CFLAGS = -O
 LFLAGS =  -lrt -lm
 		 
-all: mountain core
+all: mountain core linesize
 
 func_time.o: func_time.c func_time.h
 	$(CC) $(CFLAGS) -c func_time.c
@@ -19,3 +19,6 @@ core: core.c perf.o func_time.o
 
 clock_test: pthread_clock_test.c
 	$(CC) -g $(CFLAGS) pthread_clock_test.c -o clock_test -lpthread -lrt
+
+linesize: linesize.c linesize.o func_time.o
+	$(CC) -g $(CFLAGS) linesize.c perf.o func_time.o -o linesize -lpthread 
