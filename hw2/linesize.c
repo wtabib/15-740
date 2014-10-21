@@ -16,7 +16,7 @@
 #define NUM_ITER 256
 #define NUM_TIMES 10000
 #define NUM_ELEM 4096
-volatile int *list;
+volatile char *list;
 unsigned long offsets[2];
 
 void * add(void* in) {
@@ -41,11 +41,11 @@ void * add(void* in) {
     for (i = 0; i < NUM_TIMES; i++ ) {
 
         #if ATOMIC == 0
-          list[offset] = list[offset]+i;
+          list[offset] = list[offset]+1;
         #elif ATOMIC == 1
-          __sync_fetch_and_add(&list[offset], i);
+          __sync_fetch_and_add(&list[offset], 1);
         #else 
-          list[offset] = list[offset]+i;
+          list[offset] = list[offset]+1;
           __sync_synchronize();
         #endif
     }
@@ -56,7 +56,7 @@ void * add(void* in) {
 
 int main() {
 
-    list = (int *)calloc(NUM_ELEM, sizeof(int));
+    list = (char *)calloc(NUM_ELEM, sizeof(char));
 
     cpu_set_t cpusetMain;
     CPU_SET(7, &cpusetMain);
@@ -76,16 +76,16 @@ int main() {
     struct timespec start_j, end_j;
 
     unsigned long listaddr = (unsigned long) &list;
-    unsigned long offset = (2048 - (listaddr % 2048))/4;
+    unsigned long offset = (2048 - (listaddr % 2048));
     int j = 0;
 
     double totalTimes[NUM_ITER];
-    for (j = 0; j < NUM_ITER; j++) {
+    for (j = 0; j <= NUM_ITER; j++) {
         totalTimes[j] = 0;
     }
 
     unsigned long long totalMisses[NUM_ITER];
-    for (j = 0; j < NUM_ITER; j++) {
+    for (j = 0; j <= NUM_ITER; j++) {
         totalMisses[j] = 0;
     }
 
@@ -114,7 +114,7 @@ int main() {
     }
 
     for (i = 1; i <= NUM_ITER; i++) {
-        printf("%lu,%g\n", i * sizeof(int), totalTimes[i]/100);
+        printf("%lu,%g\n", i * sizeof(char), totalTimes[i]/100);
     }
 
     return 0;
