@@ -98,13 +98,15 @@ long perf_event_open( struct perf_event_attr *hw_event, pid_t pid,
 /*
  * start counting cache misses
  */
+#define CACHE_L1D_READ_MISS         (PERF_COUNT_HW_CACHE_L1D | PERF_COUNT_HW_CACHE_OP_READ << 8 | PERF_COUNT_HW_CACHE_RESULT_MISS << 16)
+
 void start_cachemiss_count(void)
 {
     struct perf_event_attr pe;
     memset(&pe, 0, sizeof(struct perf_event_attr));
-    pe.type = PERF_TYPE_HARDWARE;
+    pe.type = PERF_TYPE_HW_CACHE;
     pe.size = sizeof(struct perf_event_attr);
-    pe.config = PERF_COUNT_HW_CACHE_MISSES;
+    pe.config = CACHE_L1D_READ_MISS;
     pe.disabled = 1;
     pe.exclude_kernel = 1;
     pe.exclude_hv = 1;
