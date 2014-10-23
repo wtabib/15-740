@@ -3,7 +3,7 @@ AS = as
 CFLAGS = -O
 LFLAGS =  -lrt -lm
 		 
-all: mountain core linesize smt lock
+all: mountain core linesize smt lock matrix
 
 func_time.o: func_time.c func_time.h
 	$(CC) $(CFLAGS) -c func_time.c
@@ -19,6 +19,9 @@ core: core.c perf.o func_time.o
 
 smt: smt.c perf.o func_time.o
 	$(CC) -g smt.c perf.o func_time.o -o smt -lpthread  $(LFLAGS)
+
+matrix: matrix.c perf.o func_time.o
+	$(CC) -g matrix.c perf.o func_time.o -o matrix -lpthread  $(LFLAGS)
 
 lock: lock.c perf.o func_time.o
 	$(CC) -g lock.c perf.o func_time.o -o lock -lpthread  $(LFLAGS)
