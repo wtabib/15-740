@@ -32,14 +32,23 @@ cpu cores   : 6
 \section*{Understanding the Memory Hierarchy}
 
 \begin{center}
-%\includegraphics[scale=1.0]{images/mountain_simple}
+\includegraphics[scale=0.3]{images/mountain2}
 \end{center}
 
-We conclude that the line size is and cache size is 
-We do not notice a perceptible dropoff even as $n$ exceeds the size of the
-largest cache on the chip. We believe this is due to prefetching -- the
-prefetcher anticipates the next memory access and loads it into L3, so even
-though we have misses that reach L3, we never reach DRAM.
+The above image shows the output of our program in simple mode. Although one
+cannot precisely determine the sizes of the cache from the plot (because we
+only test powers of two for the number of elements), we can conjecture from
+this graph that the linesize is between 50 and 100 bytes. Since it is probably
+a power of two, we conclude it is 64 bytes. Second, looking at the drop off as
+the number of elements accessed grows, we believe the L1 cache is between
+$2^{10}$ or $2^12$ bytes in size, while the L2 cache is closer to $2^{16}$
+bytes. 
+
+As suggested in the assignment, we do not notice a perceptible dropoff
+even as $n$ exceeds the likely size of the largest cache on the chip. We believe this
+is due to prefetching -- the prefetcher anticipates the next memory access and
+loads it into L3, so even though we have misses that reach L3, we never reach
+DRAM.
 
 In order to better measure the cache size, we tried various alternative access
 patterns that would outsmart the prefetching strategy. For example, we
