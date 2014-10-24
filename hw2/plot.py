@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-f = open('better.txt', 'r')
+#f = open('better.txt', 'r')
+f = open('output_moutain_ghc.txt', 'r')
 X = []
 Y = []
 Z = []
