@@ -4,7 +4,8 @@
 #include <stdlib.h>
 
 #define CMAX 1024L*1024L*512L
-#define SMAX 256
+#define SMAX 72
+#define JUMP 10
 
 char* memory;
 
@@ -15,7 +16,7 @@ void better_measure(){
     volatile double sink;
     unsigned long long int i;
     unsigned long long int j;
-    unsigned long long numrows = 32;
+    unsigned long long numrows = 128;
     unsigned long long rowsize = (n * s) / numrows;
 
     for (i=0; i<n/numrows; i++){
@@ -26,6 +27,21 @@ void better_measure(){
     sink = result;
 }
 
+/*
+void better_measure(){
+    double result = 0.0;
+    volatile double sink;
+    unsigned long long int i;
+    unsigned long long offset = 0;
+    for (i=0; i<n; i++){
+        if(i % JUMP == 0) {
+            offset = rand() % n;
+        }
+        result = result + (double)memory[((i + offset) *s)%(1024L*1024L*512L)];
+    }
+    sink = result;
+}
+*/
 
 void simple_measure(){
     double result = 0.0;
@@ -52,6 +68,7 @@ void main(int argc, char** argv){
         memory[i] = 'a'; // (char)(i%256);
     }*/
 
+    srand(238928);
     long double secs;
     unsigned long long int j;
     for(j = 1024L; j<CMAX; j=j*4){
