@@ -40,5 +40,8 @@ Z2 = mlab.griddata(X, Y, Z, X2, Y2)
 
 
 ax.scatter(X, Y, Z)
+ax.set_xlabel("stride (Byte)")
+ax.set_ylabel("log(# of elements accessed)")
+ax.set_zlabel("MB/s")
 plt.show()
 
