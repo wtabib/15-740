@@ -1,0 +1,12 @@
+doc
+extras
+ia32
+ia64
+intel64
+include
+LICENSE
+pin
+README
+redist.txt
+pin.sh
+pin-probe-runtime.tar.gz

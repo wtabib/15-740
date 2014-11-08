@@ -19,7 +19,7 @@ int load(int n){
 
 
 void* spawnThread(void *) {
-    std::cout << "from the thread:" << getpid() << std::endl;
+    //std::cout << "from the thread:" << getpid() << std::endl;
     int i = 0;
     int a = 0;
 
@@ -35,7 +35,7 @@ void* spawnThread(void *) {
 
 int main() {
 
-    std::cout << "from the main:" << getpid() << std::endl;
+    //std::cout << "from the main:" << getpid() << std::endl;
     //int i;
     //int a;
     int arr[100];
