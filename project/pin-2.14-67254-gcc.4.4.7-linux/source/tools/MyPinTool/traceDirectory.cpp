@@ -3,6 +3,8 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+//#include "cache_tool.h"
+
 FILE *trace;
 
 enum MSI_STATE {
@@ -28,16 +30,19 @@ class dirEntry {
         } 
 
         void prettyPrint()  {
-            std::cout << "tid: " << tid << "\tmref: " << mref << "\ts: " << s << std::endl;
+            //std::cout << "tid: " << tid << "\tmref: " << mref << "\ts: " << s << std::endl;
         }   
 };
 
 
-std::vector<dirEntry> cache;
+std::vector<dirEntry> directoryCache;
+//std::vector<Cache> threadCaches;
+std::vector<OS_THREAD_ID> tids;
+OS_THREAD_ID pid;
 int find(dirEntry d) {
     unsigned int i = 0;
-    for (i = 0; i < cache.size(); i++) {
-        if (cache[i] == d) {
+    for (i = 0; i < directoryCache.size(); i++) {
+        if (directoryCache[i] == d) {
             return (int) i;
         }
     }   
@@ -53,31 +58,31 @@ VOID AddressR(VOID * addr, uint32_t tid) {
 
     int it = find(d);
      if (it > -1) {
-            std::cout << d.tid << "-" << cache[it].tid <<  ": READ ";
-            switch(cache[it].s) {
+            //std::cout << d.tid << "-" << directoryCache[it].tid <<  ": READ ";
+            switch(directoryCache[it].s) {
                 case M:
-                    if (!(cache[it].tid == (d.tid))) {
-                        cache[it].s = S;
-                        cache[it].tid = d.tid;
-                        std::cout << cache[it].mref << " M->S" << std::endl;
+                    if (!(directoryCache[it].tid == (d.tid))) {
+                        directoryCache[it].s = S;
+                        directoryCache[it].tid = d.tid;
+                        //std::cout << directoryCache[it].mref << " M->S" << std::endl;
                     }else{
-                        std::cout << cache[it].mref << " M->M" << std::endl;
+                        //std::cout << directoryCache[it].mref << " M->M" << std::endl;
                     }
                     break;
                 case S:
                     //pass
-                    std::cout << cache[it].mref << " S->S" << std::endl;
-                    cache[it].tid = d.tid; 
+                    //std::cout << directoryCache[it].mref << " S->S" << std::endl;
+                    directoryCache[it].tid = d.tid; 
                     break;
                 case I:
-                    std::cout << cache[it].mref << " I->S" << std::endl;
-                    cache[it].s = S;
-                    cache[it].tid = d.tid;
+                    //std::cout << directoryCache[it].mref << " I->S" << std::endl;
+                    directoryCache[it].s = S;
+                    directoryCache[it].tid = d.tid;
                     break;
             }
     }
     else {
-        cache.push_back(d);
+        directoryCache.push_back(d);
     }
 }   //printf("Hello: %p\n", addr);
 
@@ -92,59 +97,69 @@ VOID AddressW(VOID * addr, uint32_t tid) {
     int it = find(d);
     if (it > -1) {
         int a = 0;
-        std::cout << d.tid <<  "-" << cache[it].tid <<  ": WRITE ";
-        switch(cache[it].s) {
+        //std::cout << d.tid <<  "-" << directoryCache[it].tid <<  ": WRITE ";
+        switch(directoryCache[it].s) {
             case M:
                 //pass
-                std::cout << cache[it].mref << " M->M" << std::endl;
+                //std::cout << directoryCache[it].mref << " M->M" << std::endl;
                 break;
             case S:
-                std::cout << cache[it].mref << " S->M" << std::endl;
-                cache[it].s = M;
-                cache[it].tid = d.tid;
+                //std::cout << directoryCache[it].mref << " S->M" << std::endl;
+                directoryCache[it].s = M;
+                directoryCache[it].tid = d.tid;
                 break;
             case I:
-                std::cout << cache[it].mref << " I->M" << std::endl;
-                cache[it].s = M;
-                cache[it].tid = d.tid;
+                //std::cout << directoryCache[it].mref << " I->M" << std::endl;
+                directoryCache[it].s = M;
+                directoryCache[it].tid = d.tid;
                 break;
        } 
     }
     else {
-        cache.push_back(d);
+        directoryCache.push_back(d);
     }
 } 
 
 VOID Instruction(INS ins, VOID *v) {
     OS_THREAD_ID t;
     t = PIN_GetTid(); 
+    pid = PIN_GetPid();
+    
+    if (! (std::find(tids.begin(), tids.end(), t) != tids.end()) )
+    {
+        //then the tid needs to be put into the tid array
+        tids.push_back(t);
+        std::cout << "pid: " << pid << "\ttid: " << t << std::endl;
+    }
+
+    
     //std::cout << t << std::endl;
     if (INS_IsMemoryRead(ins)) { 
         /*dirEntry d = dirEntry(t, IARG_MEMORYREAD_EA);
         int it = find(d);
         if (it > -1) {
             std::cout << d.tid << ": READ ";
-            switch(cache[it].s) {
+            switch(directoryCache[it].s) {
                 case M:
-                    if (!(cache[it].tid == (d.tid))) {
-                        cache[it].s = S;
-                        std::cout << cache[it].mref << " M->S" << std::endl;
+                    if (!(directoryCache[it].tid == (d.tid))) {
+                        directoryCache[it].s = S;
+                        std::cout << directoryCache[it].mref << " M->S" << std::endl;
                     }else{
-                        std::cout << cache[it].mref << " M->M" << std::endl;
+                        std::cout << directoryCache[it].mref << " M->M" << std::endl;
                     }
                     break;
                 case S:
                     //pass
-                    std::cout << cache[it].mref << " S->S" << std::endl;
+                    std::cout << directoryCache[it].mref << " S->S" << std::endl;
                     break;
                 case I:
-                    std::cout << cache[it].mref << " I->S" << std::endl;
-                    cache[it].s = S;
+                    std::cout << directoryCache[it].mref << " I->S" << std::endl;
+                    directoryCache[it].s = S;
                     break;
             }
         }
         else {
-            cache.push_back(d);
+            directoryCache.push_back(d);
         }*/
         INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(AddressR), 
                 IARG_MEMORYREAD_EA, IARG_UINT32, t, IARG_END); 
@@ -154,25 +169,25 @@ VOID Instruction(INS ins, VOID *v) {
         int it = find(d);
         if (it > -1) {
             std::cout << d.tid << ": WRITE ";
-            switch(cache[it].s) {
+            switch(directoryCache[it].s) {
                 case M:
                     //pass
-                    std::cout << cache[it].mref << " M->M" << std::endl;
+                    std::cout << directoryCache[it].mref << " M->M" << std::endl;
                     break;
                 case S:
-                    std::cout << cache[it].mref << " S->M" << std::endl;
-                    cache[it].s = M;
-                    cache[it].tid = d.tid;
+                    std::cout << directoryCache[it].mref << " S->M" << std::endl;
+                    directoryCache[it].s = M;
+                    directoryCache[it].tid = d.tid;
                     break;
                 case I:
-                    std::cout << cache[it].mref << " I->M" << std::endl;
-                    cache[it].s = M;
-                    cache[it].tid = d.tid;
+                    std::cout << directoryCache[it].mref << " I->M" << std::endl;
+                    directoryCache[it].s = M;
+                    directoryCache[it].tid = d.tid;
                     break;
             }
                 e}
         else {
-            cache.push_back(d);
+            directoryCache.push_back(d);
         }*/
         INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(AddressW), 
                 IARG_MEMORYWRITE_EA, IARG_UINT32, t, IARG_END); 
@@ -181,8 +196,8 @@ VOID Instruction(INS ins, VOID *v) {
 
 VOID Fini(INT32 code, VOID *v) { 
     fclose(trace);
-    for(int i= 0; i < cache.size(); i++){
-        cache[i].prettyPrint();
+    for(int i= 0; i < directoryCache.size(); i++){
+        directoryCache[i].prettyPrint();
         if(i>1000){
             break;
         }
