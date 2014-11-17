@@ -7,25 +7,35 @@
 #include <bitset>
 
 
-/*
-   struct Block {
-   int tag;
-   char * data;
-   };
-
-   struct Cache {
-   int numSets;
-   int assoc;
-   int cacheLine;
-   Block *mem;
-   int *lru;
-   };
-
-   bool addToCache(ADDRINT iaddr, Cache *cache) {
-
-   }*/
-
 #define MAX_SETS    256
+
+enum MSI_STATE {
+    M,
+    E,
+    S,
+    I
+};
+
+class dirEntry {
+    public:
+        OS_THREAD_ID    tid;
+        ADDRINT         mref;
+        MSI_STATE       s;
+
+        dirEntry(OS_THREAD_ID t, ADDRINT a){
+            tid = t;
+            mref = a;
+            s = S;
+        }
+
+        bool operator==(const dirEntry &other){
+            return mref == other.mref;
+        } 
+
+        void prettyPrint()  {
+            //std::cout << "tid: " << tid << "\tmref: " << mref << "\ts: " << s << std::endl;
+        }   
+};
 
 struct PC {
     bool isLoad; 

@@ -44,7 +44,7 @@ VOID iCacheCount(ADDRINT iaddr, UINT32 idx)
 }
 
 // if isLoad == 0 it's a store, if isLoad == 1 it's a load
-VOID dCacheCount(ADDRINT iaddr, ADDRINT op, UINT32 opSize, UINT32 idx, UINT32 isLoad, UINT32 isSecondOp)
+VOID dCacheCount(Cache &c, const MSI_STATE &s, ADDRINT iaddr, ADDRINT op, UINT32 opSize, UINT32 idx, UINT32 isLoad, UINT32 isSecondOp)
 {
     UINT32 numBytes = opSize;
     if (! isSecondOp)

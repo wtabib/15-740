@@ -3,40 +3,14 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-//#include "cache_tool.h"
+#include "cache_tool.h"
+#include <assert.h>
 
 FILE *trace;
 
-enum MSI_STATE {
-    M,
-    S,
-    I
-};
-
-class dirEntry {
-    public:
-        OS_THREAD_ID    tid;
-        ADDRINT         mref;
-        MSI_STATE       s;
-
-        dirEntry(OS_THREAD_ID t, ADDRINT a){
-            tid = t;
-            mref = a;
-            s = S;
-        }
-
-        bool operator==(const dirEntry &other){
-            return mref == other.mref;
-        } 
-
-        void prettyPrint()  {
-            //std::cout << "tid: " << tid << "\tmref: " << mref << "\ts: " << s << std::endl;
-        }   
-};
-
 
 std::vector<dirEntry> directoryCache;
-//std::vector<Cache> threadCaches;
+std::vector<Cache> threadCaches;
 std::vector<OS_THREAD_ID> tids;
 OS_THREAD_ID pid;
 int find(dirEntry d) {
@@ -49,12 +23,33 @@ int find(dirEntry d) {
     return -1;
 }
 
+int findTID(const OS_THREAD_ID &tid) {
+    unsigned int i = 0;
+    for (i = 0; i < tids.size(); i++) {
+        if (tids[i] == tid) {
+            return (int) i;
+        }
+    }   
+    return -1;
+}
 
-VOID AddressR(VOID * addr, uint32_t tid) {
+VOID AddressR(ADDRINT iaddr, ADDRINT op, UINT32 opSize, /*UINT32 idx,*/ UINT32 isLoad, UINT32 isSecondOp, uint32_t tid ) {
     //fprintf(trace,"%p\t%u\n", addr, tid);
     //ADDRINT a = (ADDRINT) addr;
     // std::cout << "Address: " << a <<"\tProc: " <<  tid << std::endl;
-    dirEntry d = dirEntry(tid, (ADDRINT)addr);
+    
+    OS_THREAD_ID t;
+    t = PIN_GetTid(); 
+    pid = PIN_GetPid();
+    
+    int idx = findTID(t);
+    std::cout << "t = " << t << std::endl;
+    assert(idx != -1);
+
+    Cache c = threadCaches[idx];
+    MSI_STATE currState;
+ 
+    dirEntry d = dirEntry(tid, (ADDRINT)iaddr);
 
     int it = find(d);
      if (it > -1) {
@@ -69,6 +64,8 @@ VOID AddressR(VOID * addr, uint32_t tid) {
                         //std::cout << directoryCache[it].mref << " M->M" << std::endl;
                     }
                     break;
+                case E:
+                    break;
                 case S:
                     //pass
                     //std::cout << directoryCache[it].mref << " S->S" << std::endl;
@@ -80,10 +77,17 @@ VOID AddressR(VOID * addr, uint32_t tid) {
                     directoryCache[it].tid = d.tid;
                     break;
             }
+        currState = directoryCache[it].s;
     }
     else {
         directoryCache.push_back(d);
+        currState = S;
     }
+
+    //update dCacheCount 
+    //dCacheCount(c, currState, addr, );
+
+   
 }   //printf("Hello: %p\n", addr);
 
 
@@ -129,66 +133,48 @@ VOID Instruction(INS ins, VOID *v) {
     {
         //then the tid needs to be put into the tid array
         tids.push_back(t);
+
+        Cache c;
+        int directMapped = 1; //set associative = 2;
+        int cacheSize = 8; //cache size in kilobytes;
+        int lineSize = 64; //line size in bytes;
+        int missCycles = 100; //miss penalty in cycles
+
+        c.update(directMapped, cacheSize*1024, lineSize, missCycles);
+
+        threadCaches.push_back(c);
         std::cout << "pid: " << pid << "\ttid: " << t << std::endl;
     }
 
     
     //std::cout << t << std::endl;
+    const ADDRINT iaddr = INS_Address(ins);
+
     if (INS_IsMemoryRead(ins)) { 
-        /*dirEntry d = dirEntry(t, IARG_MEMORYREAD_EA);
-        int it = find(d);
-        if (it > -1) {
-            std::cout << d.tid << ": READ ";
-            switch(directoryCache[it].s) {
-                case M:
-                    if (!(directoryCache[it].tid == (d.tid))) {
-                        directoryCache[it].s = S;
-                        std::cout << directoryCache[it].mref << " M->S" << std::endl;
-                    }else{
-                        std::cout << directoryCache[it].mref << " M->M" << std::endl;
-                    }
-                    break;
-                case S:
-                    //pass
-                    std::cout << directoryCache[it].mref << " S->S" << std::endl;
-                    break;
-                case I:
-                    std::cout << directoryCache[it].mref << " I->S" << std::endl;
-                    directoryCache[it].s = S;
-                    break;
-            }
-        }
-        else {
-            directoryCache.push_back(d);
+        INS_InsertPredicatedCall(
+                ins, IPOINT_BEFORE, (AFUNPTR) AddressR,
+                IARG_ADDRINT,
+                iaddr,
+                IARG_MEMORYREAD_EA,
+                IARG_MEMORYREAD_SIZE,
+                IARG_UINT32,
+                1,
+                IARG_UINT32,
+                0,
+                IARG_UINT32,
+                t,
+                IARG_END);
+
+        /*INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(AddressR), 
+                IARG_MEMORYREAD_EA, IARG_UINT32, t, IARG_END); */
+
+        /*if (INS_HasMemoryRead2(ins)) {
+            INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(AddressR), 
+                IARG_MEMORYREAD2_EA, IARG_UINT32, t, IARG_END); 
         }*/
-        INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(AddressR), 
-                IARG_MEMORYREAD_EA, IARG_UINT32, t, IARG_END); 
     } 
+    
     if (INS_IsMemoryWrite(ins)) { 
-        /*dirEntry d = dirEntry(t, IARG_MEMORYWRITE_EA);
-        int it = find(d);
-        if (it > -1) {
-            std::cout << d.tid << ": WRITE ";
-            switch(directoryCache[it].s) {
-                case M:
-                    //pass
-                    std::cout << directoryCache[it].mref << " M->M" << std::endl;
-                    break;
-                case S:
-                    std::cout << directoryCache[it].mref << " S->M" << std::endl;
-                    directoryCache[it].s = M;
-                    directoryCache[it].tid = d.tid;
-                    break;
-                case I:
-                    std::cout << directoryCache[it].mref << " I->M" << std::endl;
-                    directoryCache[it].s = M;
-                    directoryCache[it].tid = d.tid;
-                    break;
-            }
-                e}
-        else {
-            directoryCache.push_back(d);
-        }*/
         INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(AddressW), 
                 IARG_MEMORYWRITE_EA, IARG_UINT32, t, IARG_END); 
     } 
