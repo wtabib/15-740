@@ -26,6 +26,7 @@ void* spawnThread(void * obj) {
 
     for( i = *idx; i < *idx+100; i++) {
         store(i, i);
+        a = load(i);
     }
 
     for( i = *idx; i < *idx+100; i++) {
@@ -34,7 +35,7 @@ void* spawnThread(void * obj) {
 }
 
 
-#define NUM_THREADS     10
+#define NUM_THREADS     25
 int main() {
 
     pthread_t thread[NUM_THREADS];
@@ -52,7 +53,7 @@ int main() {
 
     for (int i = 0 ; i < NUM_THREADS; i++) {
         startIndices[i] = i*100;
-        pthread_create(&(thread[i]), NULL, spawnThread, &(startIndices[i]));
+        pthread_create(&(thread[i]), NULL, spawnThread, &(startIndices[0]));
     }
 
     for (int i = 0; i < NUM_THREADS; i++) {

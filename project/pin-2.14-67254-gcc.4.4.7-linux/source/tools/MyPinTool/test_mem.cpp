@@ -25,6 +25,7 @@ void* spawnThread(void *) {
 
     for( i = 0; i < 100; i++) {
         store(i, i);
+        a = load(i);
     }
 
     for( i = 0; i < 100; i++) {

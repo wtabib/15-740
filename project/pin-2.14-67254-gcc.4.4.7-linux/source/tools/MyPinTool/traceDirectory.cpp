@@ -10,6 +10,11 @@
 
 FILE *trace;
 
+int mem_access = 0;
+int hits = 0;
+int miss = 0;
+int invalidate = 0;
+
 std::vector<dirEntry> directoryCache;
 std::vector<Cache> coreCaches;
 std::vector<int> cores;
@@ -41,12 +46,14 @@ VOID AddressR(ADDRINT iaddr, ADDRINT op, UINT32 opSize, bool write) {
 
     int core = PIN_ThreadId() % N_CORES;
     PIN_GetLock(&lock, PIN_ThreadId());
-    std::cout << "core " << core << std::endl;
+    mem_access++;
+    std::cout << "read from core " << core << std::endl;
 
     dirEntry d = dirEntry(core, iaddr);
     int found = find(d);
 
     if (found == -1) {
+        miss++;
         directoryCache.push_back(d);
     }
     else {
@@ -88,6 +95,8 @@ VOID AddressR(ADDRINT iaddr, ADDRINT op, UINT32 opSize, bool write) {
                     break;
                 case I: 
                     if (core == directoryCache[found].coreStates[i].core) {
+                        invalidate++;
+                        miss++;
                         directoryCache[found].coreStates[i].s = S;
                     }
                     break;
@@ -99,6 +108,7 @@ VOID AddressR(ADDRINT iaddr, ADDRINT op, UINT32 opSize, bool write) {
             s.core = core;
             s.s = S;
             directoryCache[found].coreStates.push_back(s);
+            miss++;
         }
 
     }
@@ -145,11 +155,14 @@ VOID AddressW(ADDRINT addr, ADDRINT pc, UINT32 size, bool write) {
 
     int core =  PIN_ThreadId() % N_CORES;
     PIN_GetLock(&lock, PIN_ThreadId());
+    std::cout << "write from core " << core << std::endl;
+    mem_access++;
 
     dirEntry d = dirEntry(core, addr);
     int found = find(d);
 
     if (found == -1) {
+        miss++;
         directoryCache.push_back(d);
     }
     else {
@@ -197,6 +210,8 @@ VOID AddressW(ADDRINT addr, ADDRINT pc, UINT32 size, bool write) {
                     break;
                 case I: 
                     if (core == directoryCache[found].coreStates[i].core) {
+                        invalidate++;
+                        miss++;
                         directoryCache[found].coreStates[i].s = M;
                     }
                     else {
@@ -212,6 +227,7 @@ VOID AddressW(ADDRINT addr, ADDRINT pc, UINT32 size, bool write) {
             s.core = core;
             s.s = M;
             directoryCache[found].coreStates.push_back(s);
+            miss++;
         }
 
     }
@@ -275,6 +291,10 @@ VOID Fini(INT32 code, VOID *v) {
             break;
         }
     }
+    std::cout << "hello" << std::endl;
+    std::cout << "memory accesses = " << mem_access << std::endl;
+    std::cout << "misses = " << miss << std::endl;
+    std::cout << "invaliate = " << invalidate << std::endl;
 
 }
 
