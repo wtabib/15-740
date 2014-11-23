@@ -1,1 +1,8 @@
 crap
+\.*
+*.txt
+*.bob
+../../*.txt
+../../*.log
+*.txt
+*.log

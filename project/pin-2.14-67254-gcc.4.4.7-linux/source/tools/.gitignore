@@ -42,3 +42,4 @@ SyscallsEmulation
 Tests
 ToolUnitTests
 Utils
+multicore-cache-sim
