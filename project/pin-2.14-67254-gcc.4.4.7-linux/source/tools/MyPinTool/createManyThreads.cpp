@@ -48,14 +48,14 @@ int main() {
         a = load(i);
     }*/
 
-    int startIndices[10];
+    int startIndices[NUM_THREADS];
 
-    for (int i = 0 ; i < 10; i++) {
-        int startIndices[i] = i*100;
+    for (int i = 0 ; i < NUM_THREADS; i++) {
+        startIndices[i] = i*100;
         pthread_create(&(thread[i]), NULL, spawnThread, &(startIndices[i]));
     }
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < NUM_THREADS; i++) {
         pthread_join(thread[i], NULL);
     }
 
