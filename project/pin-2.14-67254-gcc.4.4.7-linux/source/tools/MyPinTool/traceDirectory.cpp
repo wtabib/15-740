@@ -61,7 +61,7 @@ VOID AddressR(ADDRINT iaddr, ADDRINT op, UINT32 opSize, bool write) {
         }
 
         for (int i = 0;  i < directoryCache[found].coreStates.size(); i++) { 
-            switch(directoryCache[found].coreStates[i].state) {
+            switch(directoryCache[found].coreStates[i].s) {
                 case E:
                     if (core == directoryCache[found].coreStates[i].core) {
                        //the cores are the same and they are in the exclusive
@@ -97,7 +97,7 @@ VOID AddressR(ADDRINT iaddr, ADDRINT op, UINT32 opSize, bool write) {
         if (foundCoreInEntry == false) {
             coreState s;
             s.core = core;
-            s.state = S;
+            s.s = S;
             directoryCache[found].coreStates.push_back(s);
         }
 
@@ -146,7 +146,7 @@ VOID AddressW(ADDRINT addr, ADDRINT pc, UINT32 size, bool write) {
     int core =  PIN_ThreadId() % N_CORES;
     PIN_GetLock(&lock, PIN_ThreadId());
 
-    dirEntry d = dirEntry(core, iaddr);
+    dirEntry d = dirEntry(core, addr);
     int found = find(d);
 
     if (found == -1) {
@@ -164,7 +164,7 @@ VOID AddressW(ADDRINT addr, ADDRINT pc, UINT32 size, bool write) {
         }
 
         for (int i = 0;  i < directoryCache[found].coreStates.size(); i++) { 
-            switch(directoryCache[found].coreStates[i].state) {
+            switch(directoryCache[found].coreStates[i].s) {
                 case E:
                     if (core == directoryCache[found].coreStates[i].core) {
                        //the cores are the same and they are in the exclusive
@@ -210,7 +210,7 @@ VOID AddressW(ADDRINT addr, ADDRINT pc, UINT32 size, bool write) {
         if (foundCoreInEntry == false) {
             coreState s;
             s.core = core;
-            s.state = M;
+            s.s = M;
             directoryCache[found].coreStates.push_back(s);
         }
 

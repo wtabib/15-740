@@ -18,7 +18,7 @@ enum MSI_STATE {
 
 struct coreState {
     int core;
-    MSI_STATE state;
+    MSI_STATE s;
 };
 
 class dirEntry {
@@ -31,7 +31,7 @@ class dirEntry {
             mref = a;
             coreState s;
             s.core = cid;
-            s.state = E;
+            s.s = E;
             coreStates.push_back(s);
         }
 
