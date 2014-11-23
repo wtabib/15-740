@@ -6,7 +6,7 @@
 
 #define ELEM 100
 
-int arr[100];
+int arr[1000];
 
 void store(int n, int i){
     arr[i] = n;

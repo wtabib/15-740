@@ -16,16 +16,23 @@ enum MSI_STATE {
     I
 };
 
+struct coreState {
+    int core;
+    MSI_STATE state;
+};
+
 class dirEntry {
     public:
-        OS_THREAD_ID    tid;
+        //OS_THREAD_ID    tid;
+        std::vector<coreState>     coreStates;
         ADDRINT         mref;
-        MSI_STATE       s;
 
-        dirEntry(OS_THREAD_ID t, ADDRINT a){
-            tid = t;
+        dirEntry(int cid, ADDRINT a){
             mref = a;
-            s = S;
+            coreState s;
+            s.core = cid;
+            s.state = E;
+            coreStates.push_back(s);
         }
 
         bool operator==(const dirEntry &other){

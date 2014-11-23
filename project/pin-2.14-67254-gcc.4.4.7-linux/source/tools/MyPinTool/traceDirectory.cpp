@@ -17,7 +17,7 @@ OS_THREAD_ID pid;
 
 PIN_LOCK lock;
 
-/*int find(dirEntry d) {
+int find(dirEntry d) {
     unsigned int i = 0;
     for (i = 0; i < directoryCache.size(); i++) {
         if (directoryCache[i] == d) {
@@ -25,7 +25,7 @@ PIN_LOCK lock;
         }
     }   
     return -1;
-}*/
+}
 
 /*int findTID(const OS_THREAD_ID &tid) {
     unsigned int i = 0;
@@ -43,6 +43,67 @@ VOID AddressR(ADDRINT iaddr, ADDRINT op, UINT32 opSize, bool write) {
     PIN_GetLock(&lock, PIN_ThreadId());
     std::cout << "core " << core << std::endl;
 
+    dirEntry d = dirEntry(core, iaddr);
+    int found = find(d);
+
+    if (found == -1) {
+        directoryCache.push_back(d);
+    }
+    else {
+        //update the directory cache so that this core owns the block
+        
+        dirEntry dEntry = directoryCache[found];
+        bool  foundCoreInEntry = false;
+        for (int i = 0; i < directoryCache[found].coreStates.size(); i++) {
+            if (core == directoryCache[found].coreStates[i].core) {
+                foundCoreInEntry = true;
+            }
+        }
+
+        for (int i = 0;  i < directoryCache[found].coreStates.size(); i++) { 
+            switch(directoryCache[found].coreStates[i].state) {
+                case E:
+                    if (core == directoryCache[found].coreStates[i].core) {
+                       //the cores are the same and they are in the exclusive
+                       //state so don't change anything 
+                    }
+                    else {
+                        directoryCache[found].coreStates[i].s = S;
+                        //if we need to add a new core, then we'll add it with
+                        //state S
+                    }
+                    break;
+                case M:
+                    if (core == directoryCache[found].coreStates[i].core) {
+                        //stay here
+                    }
+                    else {
+                        //the core will flush it's data so everyone else can
+                        //see it
+                        directoryCache[found].coreStates[i].s = S;
+                    }
+                    break;
+                case S:
+                    directoryCache[found].coreStates[i].s = S;
+                    break;
+                case I: 
+                    if (core == directoryCache[found].coreStates[i].core) {
+                        directoryCache[found].coreStates[i].s = S;
+                    }
+                    break;
+            }
+        }
+
+        if (foundCoreInEntry == false) {
+            coreState s;
+            s.core = core;
+            s.state = S;
+            directoryCache[found].coreStates.push_back(s);
+        }
+
+    }
+
+    
     /*Cache c = coreCaches[core];
     MSI_STATE currState;
 
@@ -84,6 +145,78 @@ VOID AddressW(ADDRINT addr, ADDRINT pc, UINT32 size, bool write) {
 
     int core =  PIN_ThreadId() % N_CORES;
     PIN_GetLock(&lock, PIN_ThreadId());
+
+    dirEntry d = dirEntry(core, iaddr);
+    int found = find(d);
+
+    if (found == -1) {
+        directoryCache.push_back(d);
+    }
+    else {
+        //update the directory cache so that this core owns the block
+        
+        dirEntry dEntry = directoryCache[found];
+        bool  foundCoreInEntry = false;
+        for (int i = 0; i < directoryCache[found].coreStates.size(); i++) {
+            if (core == directoryCache[found].coreStates[i].core) {
+                foundCoreInEntry = true;
+            }
+        }
+
+        for (int i = 0;  i < directoryCache[found].coreStates.size(); i++) { 
+            switch(directoryCache[found].coreStates[i].state) {
+                case E:
+                    if (core == directoryCache[found].coreStates[i].core) {
+                       //the cores are the same and they are in the exclusive
+                       //state so don't change anything 
+                        directoryCache[found].coreStates[i].s = M;
+                    }
+                    else {
+                        directoryCache[found].coreStates[i].s = I;
+                        //if we need to add a new core, then we'll add it with
+                        //state S
+                    }
+                    break;
+                case M:
+                    if (core == directoryCache[found].coreStates[i].core) {
+                        //stay here
+                    }
+                    else {
+                        //the core will flush it's data so everyone else can
+                        //see it
+                        directoryCache[found].coreStates[i].s = I;
+                    }
+                    break;
+                case S:
+                    if (core == directoryCache[found].coreStates[i].core) {
+                        directoryCache[found].coreStates[i].s = M;
+                    }
+                    else {
+                        directoryCache[found].coreStates[i].s = I;
+                    }
+                    break;
+                case I: 
+                    if (core == directoryCache[found].coreStates[i].core) {
+                        directoryCache[found].coreStates[i].s = M;
+                    }
+                    else {
+                        //
+                    }
+
+                    break;
+            }
+        }
+
+        if (foundCoreInEntry == false) {
+            coreState s;
+            s.core = core;
+            s.state = M;
+            directoryCache[found].coreStates.push_back(s);
+        }
+
+    }
+
+
     /*
     dirEntry d = dirEntry(core, (ADDRINT)addr);
     core = core % N_CORES;
