@@ -35,7 +35,7 @@ void* spawnThread(void * obj) {
 }
 
 
-#define NUM_THREADS     25
+#define NUM_THREADS     30
 int main() {
 
     pthread_t thread[NUM_THREADS];
