@@ -3,11 +3,18 @@
 
 
 #define NUM_ELEM        10000
+
+
+void foo (int* a){
+    return;
+}
+
 void* spawnThread(void * obj) {
 
     int* a = (int*)obj;
     for(int i=0; i<NUM_ELEM; i++){
-        a[i]++;
+       // a[i]++;
+        foo(&a[i]);
     }
 }
 

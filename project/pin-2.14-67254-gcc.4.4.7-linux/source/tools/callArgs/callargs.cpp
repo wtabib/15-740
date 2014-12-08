@@ -51,7 +51,7 @@ VOID BazArg(ADDRINT * arg1, ADDRINT * arg2, ADDRINT * arg3)
 VOID FooArg(ADDRINT * arg1)
 {
     //std::cout << *arg1 << std::endl;
-    std::cout << "address of a+3 in pin tool" << arg1 << std::endl;
+    // std::cout << "address of a+3 in pin tool" << arg1 << std::endl;
     //*arg1 = 5;
     asm("lock incl (%0)" : : "r" (arg1) : "0");
     //__asm
