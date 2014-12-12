@@ -11,7 +11,7 @@
 #include "directoryCache.h"
 
 #define DIRECTORY_CACHE
-//#define TESTANDSET
+#define TESTANDSET
 int BUS_TRANSFER = 0;
 int WAIT_TIME = 0;
 int LOOKUP = 0;
@@ -62,18 +62,15 @@ void* spawnThread(void *obj) {
         int cycle_counts_r = updateDirectoryRead(pid, arr->r+i, WAIT_TIME,
                 BUS_TRANSFER, LOOKUP, FLUSH);
 #endif
-        store(arr->w, data, i);
 #ifdef DIRECTORY_CACHE
-        int cycle_counts_w = updateDirectoryWrite(pid, arr->w+i, WAIT_TIME,
-                BUS_TRANSFER, LOOKUP, FLUSH);
-        totalTime += (stopTime - startTime)+cycle_counts_r+cycle_counts_w;
+        totalTime += (stopTime - startTime)+cycle_counts_r;
         startTime = rdtsc();
 #endif
 #ifndef TESTANDSET
         pthread_mutex_unlock(&lock);
 #endif
 #ifdef TESTANDSET
-        *lock = 0;
+        *lockTS = 0;
 #endif
     }
 }

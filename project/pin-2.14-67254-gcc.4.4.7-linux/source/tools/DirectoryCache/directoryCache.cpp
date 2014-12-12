@@ -27,7 +27,7 @@ int find(dirEntry d) {
 }
 
 //VOID AddressR(ADDRINT iaddr, ADDRINT op, UINT32 opSize, bool write) {
-int updateDirectoryRead(int pid, int*addr) {
+int updateDirectoryRead(int pid, int*addr, int WAIT_TIME, int BUS_TRANSFER, int LOOKUP, int FLUSH) {
 
     int num_clock_cycles = 0;
 
@@ -116,8 +116,7 @@ int updateDirectoryRead(int pid, int*addr) {
 
 
 //VOID AddressW(ADDRINT addr, ADDRINT pc, UINT32 size, bool write) {
-int updateDirectoryWrite(int pid, int* addr) {
-
+int updateDirectoryWrite(int pid, int*addr, int WAIT_TIME, int BUS_TRANSFER, int LOOKUP, int FLUSH) {
     int num_clock_cycles = 0;
     int core =  pid;
     //std::cout << "write from core " << core << std::endl;

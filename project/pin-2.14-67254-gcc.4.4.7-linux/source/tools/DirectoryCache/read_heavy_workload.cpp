@@ -4,24 +4,24 @@
 #include <stdlib.h>
 #include <time.h>
 #include "gettime.h"
+#include "directoryCache.h"
 #include <sys/resource.h>
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
-#include "directoryCache.h"
 
 #define DIRECTORY_CACHE
 //#define TESTANDSET
-int BUS_TRANSFER = 0;
-int WAIT_TIME = 0;
-int LOOKUP = 0;
-int FLUSH = 0;
 
 pthread_mutex_t lock;
 int *lockTS;
 unsigned long long int totalTime = 0;
 unsigned long long int startTime;
 unsigned long long int stopTime;
+int BUS_TRANSFER = 0;
+int WAIT_TIME = 0;
+int LOOKUP = 0;
+int FLUSH = 0;
 
 void testAndSet(int *lockTS) {
     int result = 1;
@@ -45,14 +45,15 @@ void store(int* writeToArr, int data, int i) {
 
 void* spawnThread(void *obj) {
     Arr *arr = (Arr *) obj;
-    for(int i=0; i<NUM_ELEM; i++){
+    for(int i=0; i<95; i++){
 
-#ifndef TESTANDSET
-        pthread_mutex_lock(&lock);
-#endif
 #ifdef TESTANDSET
         testAndSet(lockTS);
 #endif
+#ifndef TESTANDSET
+        pthread_mutex_lock(&lock);
+#endif
+
 #ifdef DIRECTORY_CACHE
         stopTime = rdtsc();
         int pid = (int) syscall(__NR_gettid);
@@ -61,19 +62,41 @@ void* spawnThread(void *obj) {
 #ifdef DIRECTORY_CACHE
         int cycle_counts_r = updateDirectoryRead(pid, arr->r+i, WAIT_TIME,
                 BUS_TRANSFER, LOOKUP, FLUSH);
-#endif
-        store(arr->w, data, i);
-#ifdef DIRECTORY_CACHE
-        int cycle_counts_w = updateDirectoryWrite(pid, arr->w+i, WAIT_TIME,
-                BUS_TRANSFER, LOOKUP, FLUSH);
-        totalTime += (stopTime - startTime)+cycle_counts_r+cycle_counts_w;
+        totalTime += (stopTime - startTime)+cycle_counts_r;
         startTime = rdtsc();
+#endif
+#ifdef TESTANDSET
+        *lockTS = 0;
 #endif
 #ifndef TESTANDSET
         pthread_mutex_unlock(&lock);
 #endif
+
+    }
+    for (int i = 95; i<95+5; i++) {
 #ifdef TESTANDSET
-        *lock = 0;
+        testAndSet(lockTS);
+#endif
+#ifndef TESTANDSET
+        pthread_mutex_lock(&lock);
+#endif
+#ifdef DIRECTORY_CACHE
+        stopTime = rdtsc();
+        int pid = (int) syscall(__NR_gettid);
+#endif
+        int data = i;
+        store(arr->w, data, i);
+#ifdef DIRECTORY_CACHE
+        int cycle_counts_w = updateDirectoryWrite(pid, arr->w+i, WAIT_TIME,
+                BUS_TRANSFER, LOOKUP, FLUSH);
+        totalTime += (stopTime - startTime)+cycle_counts_w;
+        startTime = rdtsc();
+#endif
+#ifdef TESTANDSET
+        *lockTS = 0;
+#endif
+#ifndef TESTANDSET
+        pthread_mutex_unlock(&lock);
 #endif
     }
 }
@@ -112,6 +135,7 @@ int main(int argc, char *argv[]){
         arr.r[i] = 0;
     }
 
+    //std::cout << rdtsc() << std::endl;
     startTime = rdtsc();
     pthread_t t[NUM_THREADS];
 
@@ -123,6 +147,7 @@ int main(int argc, char *argv[]){
         pthread_join(t[i], NULL);
     }   
 
+    //std::cout << rdtsc()-startTime << std::endl;
     std::cout << totalTime << std::endl;
     return 0;
 }

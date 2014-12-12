@@ -6,10 +6,10 @@
 #define     N_CORES     5
 
 //define the number of clock cycles for part
-#define WAIT_TIME       1
+/*#define WAIT_TIME       1
 #define BUS_TRANSFER    2
 #define LOOKUP          5
-#define FLUSH           7
+#define FLUSH           7*/
 
 int load(int i, int *readFromArr);
 void store(int* writeToArr, int data, int i);
@@ -19,7 +19,7 @@ typedef struct {
     int r[NUM_ELEM];
 } Arr;
 
-int updateDirectoryRead(int pid, int*addr);
-int updateDirectoryWrite(int pid, int* addr);
+int updateDirectoryRead(int pid, int*addr, int, int, int, int);
+int updateDirectoryWrite(int pid, int* addr, int, int, int, int);
 
 #endif
