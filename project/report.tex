@@ -1,7 +1,7 @@
-\documentclass{scrartcl}
+\documentclass{article}
 
-\title{Planning For Complex Sentences}
-\subtitle{15-740 Planning, Execution, and Learning}
+\title{15-740: Computer Architecture\\
+Final Report }
 \author{Wennie Tabib (wtabib), Vittorio Perera (vdperera)}
 
 \begin{document}
@@ -9,4 +9,24 @@
 
 \section{Introduction}
 
+In this project we explored the benefits of using a directory-based message passing technique to handle the execution of critical sections in a multi core environment.
+
+A critical section is a piece of code that accesses a shared resource (i.e. memory locations) that, in order to preserve the correct execution of the code, should not be concurrently accessed by more than one thread of execution. Today, the most common way to handle critical sections is mutual exclusions; before entering the critical section each thread will try to grab a lock and only when the lock is granted the execution will proceed. 
+This solution intrinsically reduce the amount of parallel work the system can execute as only one thread at the time can access the shared resource. 
+While this is a suitable solution when only few processors $\mathcal{P}$ are available it does not scale as $\mathcal{P}$ increases to the order of hundreds of thousand.
+
+Our proposed solution is highly inspired by Dash \cite{DASH}. All the processors in the system are connected by a shared directory that implements a MOESI protocol to guarantee coherence. The directory is also responsible to send and receive messages to each processor to ...? . Contrary to dash our solution was implemented on simulation only, the rest of this report will describe the system design chosen (Section~\ref{sec:design}), present the result achieved (Section~\ref{sec:results}) and finally draw our conclusions (Section~\ref{sec:conclusion}).
+
+\section{System Design}\label{sec:design}
+
+
+
+\section{Experiments and results}\label{sec:results}
+
+
+\section{Conclusions}\label{sec:conclusion}
+
+
+\bibliographystyle{plain}
+\bibliography{biblio}
 \end{document}
