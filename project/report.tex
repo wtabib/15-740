@@ -45,9 +45,9 @@ The block in green illustrates the directory-based cache implemented in pin.
 The MESI protocol is illustrated in Figure \ref{MESI}.
 MESI stands for ``Modified, Exclusive, Shared, Invalid" which are the names of the states assigned to an element of the array to represent the state of ownership for a given core.  
 The biggest difference between this protocol and the MSI ("Modified, Shared, Invalid") protocol is that the there is an additional \emph{Exclusive} state, which means that the core has sole ownership of the data and can read or modify it at will.
-The chart below illustrates the permitted states of a given element for a pair of caches:\\
-
-\begin{center}
+Table~\ref{tab:MESI} illustrates the permitted states of a given element for a pair of caches:
+\begin{table}[!h]
+\centering
 \begin{tabular}{|c|c|c|c|c|}
 \hline
 &M&E&S&I\\
@@ -58,14 +58,17 @@ S&X&X&\checkmark&\checkmark\\
 I&\checkmark&\checkmark&\checkmark&\checkmark\\
 \hline
 \end{tabular}
-\end{center}
+\caption{Permitted states of a given element for a pair of caches}
+\label{tab:MESI}
+\end{table}
+
 
 
 \begin{figure}[H]
 \begin{center}
 \includegraphics[scale=0.4]{images/MESI.png}
 \end{center}
-\caption{Illustration of the MESI protocol}
+\caption{The MESI protocol}
 \label{MESI}
 \end{figure}
 
@@ -117,9 +120,9 @@ The following numbers were used in calculating the time it takes in order to per
 \begin{center}
 \begin{tabular}{lc}
 Time to transfer on bus & 2\\
-wait time & 0\\
-lookup & 5\\
-flush & 7\\
+Wait time & 0\\
+Lookup & 5\\
+Flush & 7\\
 \end{tabular}
 \end{center}
 
@@ -136,8 +139,8 @@ The C workload is 100\% read.
 Experiments were run to profile the efficiency of test-and-set versus the pthread library.
 Table \ref{table:comp} shows the results using the above assignments for operations.
 
-\begin{center}
-\begin{table}[h]
+
+\begin{table}[h]\centering
 \begin{tabular}{|ccc|} 
 \hline
 Workload & Pthread & Test-and-set\\
@@ -150,7 +153,7 @@ Workload & Pthread & Test-and-set\\
 \caption{Table of Peformance for Pthread vs. Test-and-set}
 \label{table:comp}
 \end{table}
-\end{center}
+
 
 As can be seen in the table above the pthread library performs better than the test-and-set lock.
 The reason for this increase in performance is that the test-and-set spins on the lock which wastes clock cycles.
@@ -171,6 +174,9 @@ The most likely cause of this is that the test-and-set function essentially uses
 
 \section{Conclusions}\label{sec:conclusion}
 
+Summing up, in this project we looked into the benefit offered by using directory-based message passing techniques to handle critical sections. We implemented a simulation of a system using message passing in pin tool, we designed a set of three bechmarks to test our design and reported on the result obtained. During this process we also implemented our own version of a lock.
+
+The result show how our implementation of the lock is less efficient then the one used by pthread, but this was to be expected as we implemented the most na{\"i}ve algorithm to acquire a lock, namely test-and-set.
 
 
 \bibliographystyle{plain}
